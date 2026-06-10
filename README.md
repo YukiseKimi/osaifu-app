@@ -62,17 +62,20 @@ To test sync, run the app on two devices/simulators signed into the **same iClou
 
 ```
 MyApp/
-├─ ContentView.swift       # App entry point + RootView (the TabView)
-├─ Expense.swift           # SwiftData @Model (CloudKit-compatible)
-├─ ExpenseCategory.swift   # Categories with titles, SF Symbols, and colors
-├─ ExpenseAnalytics.swift  # Aggregation helpers + currency formatting
-├─ Currency.swift          # Selectable currencies for display
-├─ OverviewView.swift      # This-month donut chart + breakdown
-├─ ExpensesListView.swift  # Chronological list grouped by month (edit/delete)
-├─ HistoryView.swift       # Month-by-month stacked bar chart
-├─ ExpenseFormView.swift   # Add/edit form
-├─ SettingsView.swift      # Currency picker + sample-data tools
-└─ SampleData.swift        # Randomized example data generator
+├─ ContentView.swift          # App entry point + RootView (the TabView)
+├─ Models/
+│  ├─ Expense.swift           # SwiftData @Model (CloudKit-compatible)
+│  ├─ ExpenseCategory.swift   # Categories with titles, SF Symbols, and colors
+│  └─ Currency.swift          # Selectable currencies for display
+├─ Logic/
+│  ├─ ExpenseAnalytics.swift  # Aggregation helpers + currency formatting
+│  └─ SampleData.swift        # Randomized example data generator
+└─ Views/
+   ├─ OverviewView.swift      # This-month donut chart + breakdown
+   ├─ ExpensesListView.swift  # Chronological list grouped by month (edit/delete)
+   ├─ HistoryView.swift       # Month-by-month stacked bar chart
+   ├─ ExpenseFormView.swift   # Add/edit form
+   └─ SettingsView.swift      # Currency picker + sample-data tools
 ```
 
 ## Roadmap
