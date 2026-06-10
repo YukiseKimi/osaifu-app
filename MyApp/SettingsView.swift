@@ -1,9 +1,14 @@
 import SwiftUI
+import SwiftData
 
-/// App preferences. Currently lets the user choose the currency used to format
-/// every amount throughout the app.
+/// App preferences: the display currency, plus developer-friendly tools for
+/// populating and clearing sample data.
 struct SettingsView: View {
+    @Environment(\.modelContext) private var modelContext
     @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
+    @Query private var expenses: [Expense]
+
+    @State private var showingDeleteConfirmation = false
 
     /// The currency choices, always including the current selection so the
     /// picker can highlight it even if it isn't in the curated list.
@@ -28,8 +33,41 @@ struct SettingsView: View {
                 Section("Preview") {
                     LabeledContent("Example", value: 1234.56.currencyFormatted(code: currencyCode))
                 }
+                Section {
+                    Button {
+                        SampleData.insert(into: modelContext)
+                    } label: {
+                        Label("Add Sample Data", systemImage: "wand.and.stars")
+                    }
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label("Delete All Expenses", systemImage: "trash")
+                    }
+                    .disabled(expenses.isEmpty)
+                } header: {
+                    Text("Data")
+                } footer: {
+                    Text("Sample data adds randomized expenses across the last several months for trying out the charts.")
+                }
             }
             .navigationTitle("Settings")
+            .confirmationDialog(
+                "Delete all expenses?",
+                isPresented: $showingDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete All (\(expenses.count))", role: .destructive, action: deleteAll)
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This permanently removes every expense and can't be undone.")
+            }
+        }
+    }
+
+    private func deleteAll() {
+        for expense in expenses {
+            modelContext.delete(expense)
         }
     }
 }
