@@ -15,6 +15,12 @@ struct BudgetApp: App {
 
 /// The top-level tab interface, shared across iOS and macOS.
 struct RootView: View {
+    @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
+
+    private var appearance: AppearanceMode {
+        AppearanceMode(rawValue: appearanceRaw) ?? .system
+    }
+
     var body: some View {
         TabView {
             Tab("Overview", systemImage: "chart.pie.fill") {
@@ -30,6 +36,9 @@ struct RootView: View {
                 SettingsView()
             }
         }
+        .tint(.appAccent)
+        // System follows the device; Light/Dark force a scheme app-wide.
+        .preferredColorScheme(appearance.colorScheme)
     }
 }
 

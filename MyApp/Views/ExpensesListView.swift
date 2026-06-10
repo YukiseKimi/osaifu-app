@@ -46,6 +46,7 @@ struct ExpensesListView: View {
                     }
                 }
             }
+            .moodBackground()
             .navigationTitle("Expenses")
             #if os(iOS)
             .toolbar { EditButton() }
@@ -70,9 +71,7 @@ private struct ExpenseRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: expense.category.systemImage)
-                .foregroundStyle(expense.category.color)
-                .frame(width: 28)
+            CategoryIcon(category: expense.category)
             VStack(alignment: .leading, spacing: 2) {
                 Text(expense.category.title)
                 if !expense.note.isEmpty {

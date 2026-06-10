@@ -21,6 +21,11 @@ struct OverviewView: View {
         monthExpenses.reduce(0) { $0 + $1.amount }
     }
 
+    /// Color used for the glow halo behind the donut (largest category).
+    private var glowColor: Color {
+        categoryTotals.first?.category.color ?? .appAccent
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -30,6 +35,7 @@ struct OverviewView: View {
                     content
                 }
             }
+            .moodBackground()
             .navigationTitle("This Month")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -48,6 +54,7 @@ struct OverviewView: View {
         List {
             Section {
                 chart
+                    .listRowBackground(Color.clear)
             }
             Section("Categories") {
                 ForEach(categoryTotals) { item in
@@ -77,6 +84,16 @@ struct OverviewView: View {
             )
             .chartLegend(.hidden)
             .frame(height: 240)
+            .background {
+                Circle()
+                    .fill(RadialGradient(
+                        colors: [glowColor.opacity(0.45), .clear],
+                        center: .center,
+                        startRadius: 8,
+                        endRadius: 150
+                    ))
+                    .blur(radius: 28)
+            }
             .overlay {
                 VStack {
                     Text("Total")
@@ -84,6 +101,7 @@ struct OverviewView: View {
                         .foregroundStyle(.secondary)
                     Text(monthTotal.currencyFormatted(code: currencyCode))
                         .font(.title2.bold())
+                        .glow(glowColor, radius: 4)
                 }
             }
         }
@@ -114,10 +132,8 @@ private struct CategoryRow: View {
     }
 
     var body: some View {
-        HStack {
-            Image(systemName: item.category.systemImage)
-                .foregroundStyle(item.category.color)
-                .frame(width: 28)
+        HStack(spacing: 12) {
+            CategoryIcon(category: item.category)
             VStack(alignment: .leading) {
                 Text(item.category.title)
                 Text(share, format: .percent.precision(.fractionLength(0)))

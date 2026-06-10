@@ -37,14 +37,13 @@ struct HistoryView: View {
                     List {
                         Section("Monthly Spending") {
                             chart
+                                .listRowBackground(Color.clear)
                         }
                         ForEach(summaries.reversed()) { summary in
                             Section(summary.monthStart.formatted(.dateTime.month(.wide).year())) {
                                 ForEach(summary.categoryTotals) { item in
-                                    HStack {
-                                        Image(systemName: item.category.systemImage)
-                                            .foregroundStyle(item.category.color)
-                                            .frame(width: 28)
+                                    HStack(spacing: 12) {
+                                        CategoryIcon(category: item.category, size: 30)
                                         Text(item.category.title)
                                         Spacer()
                                         Text(item.total.currencyFormatted(code: currencyCode))
@@ -63,6 +62,7 @@ struct HistoryView: View {
                     }
                 }
             }
+            .moodBackground()
             .navigationTitle("History")
         }
     }
@@ -74,6 +74,7 @@ struct HistoryView: View {
                 y: .value("Amount", row.total)
             )
             .foregroundStyle(by: .value("Category", row.category.title))
+            .cornerRadius(4)
         }
         .chartForegroundStyleScale(
             domain: usedCategories.map(\.title),

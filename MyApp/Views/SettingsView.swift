@@ -1,11 +1,12 @@
 import SwiftUI
 import SwiftData
 
-/// App preferences: the display currency, plus developer-friendly tools for
-/// populating and clearing sample data.
+/// App preferences: appearance, the display currency, plus developer-friendly
+/// tools for populating and clearing sample data.
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
+    @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
     @Query private var expenses: [Expense]
 
     @State private var showingDeleteConfirmation = false
@@ -22,6 +23,14 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("Appearance") {
+                    Picker("Theme", selection: $appearanceRaw) {
+                        ForEach(AppearanceMode.allCases) { mode in
+                            Text(mode.title).tag(mode.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
                 Section("Currency") {
                     Picker("Currency", selection: $currencyCode) {
                         ForEach(currencies) { currency in
@@ -51,6 +60,7 @@ struct SettingsView: View {
                     Text("Sample data adds randomized expenses across the last several months for trying out the charts.")
                 }
             }
+            .moodBackground()
             .navigationTitle("Settings")
             .confirmationDialog(
                 "Delete all expenses?",
