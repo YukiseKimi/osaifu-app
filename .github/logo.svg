@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Osaifu app logo">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2A5C92"/>
+      <stop offset="1" stop-color="#13304C"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6C75A"/>
+      <stop offset="1" stop-color="#DD9326"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAF1F8"/>
+      <stop offset="1" stop-color="#C7D7E8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App tile -->
+  <rect x="0" y="0" width="512" height="512" rx="115" fill="url(#tile)"/>
+
+  <!-- Card peeking out of the wallet -->
+  <rect x="156" y="150" width="200" height="74" rx="16" fill="url(#card)"/>
+
+  <!-- Wallet body -->
+  <rect x="106" y="188" width="300" height="176" rx="32" fill="#FFFFFF"/>
+  <!-- Pocket seam -->
+  <rect x="106" y="248" width="300" height="6" fill="#E2E8F0"/>
+
+  <!-- Yen coin / clasp -->
+  <circle cx="404" cy="276" r="46" fill="url(#coin)" stroke="#FFFFFF" stroke-width="6"/>
+  <text x="404" y="293" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',-apple-system,Helvetica,Arial,sans-serif" font-size="50" font-weight="700" fill="#13304C">¥</text>
+</svg>

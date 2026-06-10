@@ -1,0 +1,37 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Osaifu — multiplatform expense tracker">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#122F4B"/>
+      <stop offset="1" stop-color="#0C2236"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2A5C92"/>
+      <stop offset="1" stop-color="#13304C"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6C75A"/>
+      <stop offset="1" stop-color="#DD9326"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAF1F8"/>
+      <stop offset="1" stop-color="#C7D7E8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="360" fill="url(#bg)"/>
+
+  <!-- Logo mark (reuses the app-icon artwork via a nested viewBox) -->
+  <svg x="80" y="52" width="256" height="256" viewBox="0 0 512 512">
+    <rect x="0" y="0" width="512" height="512" rx="115" fill="url(#tile)"/>
+    <rect x="156" y="150" width="200" height="74" rx="16" fill="url(#card)"/>
+    <rect x="106" y="188" width="300" height="176" rx="32" fill="#FFFFFF"/>
+    <rect x="106" y="248" width="300" height="6" fill="#E2E8F0"/>
+    <circle cx="404" cy="276" r="46" fill="url(#coin)" stroke="#FFFFFF" stroke-width="6"/>
+    <text x="404" y="293" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',-apple-system,Helvetica,Arial,sans-serif" font-size="50" font-weight="700" fill="#13304C">¥</text>
+  </svg>
+
+  <!-- Wordmark -->
+  <text x="384" y="170" font-family="-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="104" font-weight="800" fill="#FFFFFF">Osaifu</text>
+  <text x="388" y="232" font-family="'Hiragino Sans','Noto Sans JP',sans-serif" font-size="44" font-weight="700" fill="#F6C75A">お財布</text>
+  <text x="390" y="284" font-family="-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="27" font-weight="400" fill="#AFC2D6">Multiplatform expense tracker · iOS &amp; macOS</text>
+</svg>
