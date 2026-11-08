@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 
 /// An amount of money: whole minor units, and the currency they are in.
 ///
@@ -18,12 +19,21 @@ public struct Money: Hashable, Sendable {
         Money(minorUnits: 0, currencyCode: currencyCode)
     }
 
+    /// The answers so far. A NumberFormatter costs more than the lookup, and
+    /// every row of a list asks for the same few currencies.
+    private static let knownMinorDigits = Mutex<[String: Int]>([:])
+
     /// The minor digits the system records for a currency: 0 for JPY, 2 for USD.
     public static func minorDigits(of currencyCode: String) -> Int {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = currencyCode
-        return formatter.maximumFractionDigits
+        knownMinorDigits.withLock { known in
+            if let digits = known[currencyCode] { return digits }
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .currency
+            formatter.currencyCode = currencyCode
+            let digits = formatter.maximumFractionDigits
+            known[currencyCode] = digits
+            return digits
+        }
     }
 
     public var minorDigits: Int { Self.minorDigits(of: currencyCode) }
@@ -59,15 +69,50 @@ public struct Money: Hashable, Sendable {
         )
     }
 
-    /// Reads what a person typed, such as "12.8" or "1,280". Returns nil for
-    /// anything that is not a number.
-    public init?(typed text: String, currencyCode: String) {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        guard let value = Decimal(string: trimmed, locale: .current) ?? Decimal(string: trimmed) else {
-            return nil
-        }
+    /// Reads what a person typed, in their own locale: "1,280.50" in the
+    /// United States, "1.280,50" in Germany, "1280" anywhere.
+    ///
+    /// It returns nil for anything that is not a plain number. Foundation's own
+    /// parsers read a valid prefix and stop, which turns "1,280" into 1 and
+    /// loses most of the amount without a word.
+    public init?(typed text: String, currencyCode: String, locale: Locale = .current) {
+        guard let value = Self.decimal(fromTyped: text, locale: locale) else { return nil }
         self.init(decimal: value, currencyCode: currencyCode)
+    }
+
+    static func decimal(fromTyped text: String, locale: Locale) -> Decimal? {
+        var cleaned = text.filter { !$0.isWhitespace }
+        guard !cleaned.isEmpty else { return nil }
+
+        if let grouping = locale.groupingSeparator, !grouping.isEmpty {
+            cleaned = removingGrouping(cleaned, separator: grouping)
+        }
+
+        // Whatever separator is left must be the decimal one, and there can be
+        // only one of it.
+        guard cleaned.filter({ $0 == "." || $0 == "," }).count <= 1 else { return nil }
+        cleaned = cleaned.replacingOccurrences(of: ",", with: ".")
+
+        guard cleaned.wholeMatch(of: /-?\d+(\.\d+)?/) != nil
+                || cleaned.wholeMatch(of: /-?\.\d+/) != nil
+        else { return nil }
+
+        return Decimal(string: cleaned, locale: Locale(identifier: "en_US_POSIX"))
+    }
+
+    /// Removes a grouping separator only where it truly groups, which is where
+    /// three digits follow it. In a locale that groups with a dot, "12.8" is
+    /// still twelve point eight, not one hundred and twenty eight.
+    static func removingGrouping(_ text: String, separator: String) -> String {
+        let parts = text.components(separatedBy: separator)
+        guard parts.count > 1 else { return text }
+
+        let head = parts[0].hasPrefix("-") ? String(parts[0].dropFirst()) : parts[0]
+        guard (1...3).contains(head.count), head.allSatisfy(\.isNumber) else { return text }
+        for part in parts.dropFirst() where part.prefix(while: \.isNumber).count != 3 {
+            return text
+        }
+        return parts.joined()
     }
 
     /// Adds the amounts in one currency, and leaves every other currency out.

@@ -34,7 +34,13 @@ public enum ExpenseAnalytics {
     public static func categoryTotals(for expenses: [Expense], in currencyCode: String) -> [CategoryTotal] {
         Dictionary(grouping: expenses.filter { $0.currencyCode == currencyCode }, by: \.category)
             .map { CategoryTotal(category: $0.key, total: Money.sum($0.value.map(\.money), in: currencyCode)) }
-            .sorted { $0.total.minorUnits > $1.total.minorUnits }
+            // The category breaks a tie, so two equal totals keep one order
+            // from one redraw to the next.
+            .sorted {
+                $0.total.minorUnits == $1.total.minorUnits
+                    ? $0.category.rawValue < $1.category.rawValue
+                    : $0.total.minorUnits > $1.total.minorUnits
+            }
     }
 
     /// The subset of `expenses` falling in the same calendar month as `date`.

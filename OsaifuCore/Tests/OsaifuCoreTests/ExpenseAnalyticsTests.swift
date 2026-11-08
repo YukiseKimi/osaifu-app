@@ -88,6 +88,16 @@ struct ExpenseAnalyticsTests {
         #expect(rows.first { $0.category == .food }?.total.minorUnits == 1500)
     }
 
+    @Test("Two equal totals keep one order")
+    func equalTotalsKeepOneOrder() {
+        let totals = ExpenseAnalytics.categoryTotals(for: [
+            yen(2000, .transport, day(2026, 6, 1)),
+            yen(2000, .health, day(2026, 6, 2)),
+            yen(2000, .food, day(2026, 6, 3))
+        ], in: "JPY")
+        #expect(totals.map(\.category) == [.food, .health, .transport])
+    }
+
     @Test("A month starts on its first day")
     func monthStartsOnItsFirstDay() {
         #expect(ExpenseAnalytics.startOfMonth(day(2026, 6, 17), calendar: utc) == day(2026, 6, 1))
