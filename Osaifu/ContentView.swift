@@ -4,13 +4,25 @@ import OsaifuCore
 
 @main
 struct OsaifuApp: App {
+    /// The store, or the migration failure that stopped it from opening.
+    private let store: Result<ModelContainer, any Error>
+
+    init() {
+        // StoreSetup copies the store before a migration runs, and mirrors it
+        // to iCloud through the CloudKit capability in the entitlements.
+        store = Result { try StoreSetup.makeContainer() }
+    }
+
     var body: some Scene {
         WindowGroup {
-            RootView()
+            switch store {
+            case .success(let container):
+                RootView()
+                    .modelContainer(container)
+            case .failure(let error):
+                StoreFailureView(error: error)
+            }
         }
-        // SwiftData automatically enables iCloud sync when the iCloud/CloudKit
-        // capability is present in the project's entitlements.
-        .modelContainer(for: Expense.self)
     }
 }
 
