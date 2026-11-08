@@ -6,6 +6,7 @@ import OsaifuCore
 /// The current month at a glance: a donut chart of spending by category, the
 /// running total, and a per-category list. New expenses are added from here.
 struct OverviewView: View {
+    @Environment(SyncMonitor.self) private var sync
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
     @Environment(\.homeCurrencyCode) private var currencyCode
     @State private var isAddingExpense = false
@@ -44,6 +45,9 @@ struct OverviewView: View {
             .moodBackground()
             .navigationTitle("This Month")
             .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    SyncBadge(account: sync.account)
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add Expense", systemImage: "plus") {
                         isAddingExpense = true
@@ -58,6 +62,12 @@ struct OverviewView: View {
 
     private var content: some View {
         List {
+            if !sync.account.syncs && sync.account != .unknown {
+                Section {
+                    SyncNotice(account: sync.account)
+                }
+                .listRowBackground(Color.clear)
+            }
             Section {
                 chart
                     .listRowBackground(Color.clear)
