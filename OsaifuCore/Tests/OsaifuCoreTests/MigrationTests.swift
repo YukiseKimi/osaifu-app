@@ -85,3 +85,55 @@ struct MigrationTests {
         #expect(copyURL.lastPathComponent.hasPrefix("default-"))
     }
 }
+
+@Suite("Moving the store into the App Group")
+struct StoreCopyTests {
+
+    private func makeFolder() throws -> URL {
+        let folder = URL.temporaryDirectory.appending(path: "osaifu-copy-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder
+    }
+
+    @Test("The store and the two files beside it are copied")
+    func copiesTheWholeStore() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let old = folder.appending(path: "old/default.store")
+        try FileManager.default.createDirectory(at: old.deletingLastPathComponent(), withIntermediateDirectories: true)
+        for suffix in ["", "-wal", "-shm"] {
+            try Data(suffix.utf8).write(to: URL(filePath: old.path + suffix))
+        }
+        let new = folder.appending(path: "group/default.store")
+
+        #expect(try StoreSetup.copyStoreIfNeeded(from: old, to: new) == true)
+
+        for suffix in ["", "-wal", "-shm"] {
+            #expect(FileManager.default.fileExists(atPath: new.path + suffix))
+        }
+        #expect(FileManager.default.fileExists(atPath: old.path), "the old store stays where it is")
+    }
+
+    @Test("A store that is already in the group is left alone")
+    func doesNotCopyTwice() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let old = folder.appending(path: "old.store")
+        let new = folder.appending(path: "new.store")
+        try Data("old".utf8).write(to: old)
+        try Data("new".utf8).write(to: new)
+
+        #expect(try StoreSetup.copyStoreIfNeeded(from: old, to: new) == false)
+        #expect(try Data(contentsOf: new) == Data("new".utf8))
+    }
+
+    @Test("A first launch has no store to copy")
+    func nothingToCopy() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        #expect(try StoreSetup.copyStoreIfNeeded(
+            from: folder.appending(path: "missing.store"),
+            to: folder.appending(path: "new.store")
+        ) == false)
+    }
+}
