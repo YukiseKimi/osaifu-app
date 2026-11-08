@@ -37,27 +37,54 @@ public enum StoreSetup {
 
         // SwiftData calls fatalError when a group is named that the app is not
         // entitled to, so ask first. A catch cannot save the app from that.
-        let configuration: ModelConfiguration
+        var configuration = ownToTheApp
         if canUseAppGroup(appGroupID) {
             let shared = ModelConfiguration(
                 schema: schema,
                 groupContainer: .identifier(appGroupID),
                 cloudKitDatabase: .private(cloudContainerID)
             )
-            // The group gives the store a new place. This carries the old store
-            // across, once, the first time the app runs with the group.
-            try? copyStoreIfNeeded(from: ownToTheApp.url, to: shared.url)
-            configuration = shared
-        } else {
-            configuration = ownToTheApp
+            do {
+                // The group gives the store a new place. This carries the old
+                // store across, once, the first time the app runs with it.
+                try copyStoreIfNeeded(from: ownToTheApp.url, to: shared.url)
+                configuration = shared
+            } catch {
+                // The copy failed, so the group holds no store, or part of one.
+                // Keep reading the store that certainly holds the expenses.
+                configuration = ownToTheApp
+            }
         }
 
-        let backup = try? backUpStore(at: configuration.url)
+        // A copy of the store is worth its disk only when a migration is about
+        // to run. Every other launch opens the store as it is.
+        let backup = migrationIsExpected() ? try? backUpStore(at: configuration.url) : nil
         do {
-            return try container(schema: schema, configuration: configuration)
+            let store = try container(schema: schema, configuration: configuration)
+            UserDefaults.standard.set(currentSchemaVersion, forKey: storeVersionKey)
+            return store
         } catch {
             throw Failure(underlying: error, backupURL: backup)
         }
+    }
+
+    /// The schema this build knows, as "3.0.0".
+    public static var currentSchemaVersion: String {
+        let version = OsaifuSchemaV3.versionIdentifier
+        return "\(version.major).\(version.minor).\(version.patch)"
+    }
+
+    static let storeVersionKey = "OsaifuStoreSchemaVersion"
+
+    /// True when the store was last opened by a build that knew another schema,
+    /// which is when SwiftData runs a migration. It is also true on the first
+    /// launch of this build for an older store, which never wrote the key.
+    public static func migrationIsExpected() -> Bool {
+        migrationIsExpected(lastOpenedVersion: UserDefaults.standard.string(forKey: storeVersionKey))
+    }
+
+    static func migrationIsExpected(lastOpenedVersion: String?) -> Bool {
+        lastOpenedVersion != currentSchemaVersion
     }
 
     /// True when this app may read the group container. It is false in a test
@@ -74,7 +101,10 @@ public enum StoreSetup {
         )
     }
 
-    /// Copies a store, and the two SQLite files beside it, into a new place.
+    /// The store, and the two files SQLite keeps beside it.
+    static let storeFileSuffixes = ["", "-wal", "-shm"]
+
+    /// Copies a store and its two SQLite files into a new place.
     ///
     /// It does nothing when the new place already holds a store, so it runs
     /// once. A copy that fails part way leaves nothing behind, and the old
@@ -87,14 +117,25 @@ public enum StoreSetup {
               !files.fileExists(atPath: new.path)
         else { return false }
 
+        try copyStoreFiles(from: old, to: new, replacing: false)
+        return true
+    }
+
+    /// Copies the store and its sidecars, and removes what it wrote if any one
+    /// of them fails, so a half copy never stands in for a store.
+    static func copyStoreFiles(from old: URL, to new: URL, replacing: Bool) throws {
+        let files = FileManager.default
         try files.createDirectory(at: new.deletingLastPathComponent(), withIntermediateDirectories: true)
 
         var written: [URL] = []
         do {
-            for suffix in ["", "-wal", "-shm"] {
+            for suffix in storeFileSuffixes {
                 let source = URL(filePath: old.path + suffix)
                 guard files.fileExists(atPath: source.path) else { continue }
                 let target = URL(filePath: new.path + suffix)
+                if replacing, files.fileExists(atPath: target.path) {
+                    try files.removeItem(at: target)
+                }
                 try files.copyItem(at: source, to: target)
                 written.append(target)
             }
@@ -102,7 +143,6 @@ public enum StoreSetup {
             for file in written { try? files.removeItem(at: file) }
             throw error
         }
-        return true
     }
 
     /// A store that lives in memory, for previews and tests.
@@ -114,10 +154,14 @@ public enum StoreSetup {
         )
     }
 
-    /// Copies the store beside itself, under `Backups`, and returns the copy.
-    /// Returns nil when there is no store yet, which is every first launch.
+    /// Copies the store, and the two SQLite files beside it, under `Backups`.
+    /// Returns the copy, or nil when there is no store yet.
+    ///
+    /// The `-wal` file holds transactions that SQLite has not written into the
+    /// store itself, so a copy of the store alone can be missing the newest
+    /// expenses.
     @discardableResult
-    public static func backUpStore(at url: URL) throws -> URL? {
+    public static func backUpStore(at url: URL, keeping: Int = 3) throws -> URL? {
         let files = FileManager.default
         guard files.fileExists(atPath: url.path) else { return nil }
 
@@ -129,10 +173,29 @@ public enum StoreSetup {
             .dateSeparator(.omitted)
             .timeSeparator(.omitted)
         )
-        let copy = folder.appending(path: "\(url.deletingPathExtension().lastPathComponent)-\(stamp).\(url.pathExtension)")
-        if files.fileExists(atPath: copy.path) { try files.removeItem(at: copy) }
-        try files.copyItem(at: url, to: copy)
+        let name = url.deletingPathExtension().lastPathComponent
+        let copy = folder.appending(path: "\(name)-\(stamp).\(url.pathExtension)")
+        try copyStoreFiles(from: url, to: copy, replacing: true)
+        try? pruneBackups(in: folder, matching: name, keeping: keeping)
         return copy
+    }
+
+    /// Deletes all but the newest `keeping` backups, so the folder cannot grow
+    /// without end.
+    static func pruneBackups(in folder: URL, matching name: String, keeping: Int) throws {
+        let files = FileManager.default
+        let all = try files.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.creationDateKey])
+            .filter { $0.lastPathComponent.hasPrefix("\(name)-") && $0.pathExtension == "store" }
+            .sorted { left, right in
+                let a = (try? left.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                let b = (try? right.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+                return a > b
+            }
+        for old in all.dropFirst(max(0, keeping)) {
+            for suffix in storeFileSuffixes {
+                try? files.removeItem(at: URL(filePath: old.path + suffix))
+            }
+        }
     }
 }
 

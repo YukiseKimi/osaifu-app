@@ -137,3 +137,60 @@ struct StoreCopyTests {
         ) == false)
     }
 }
+
+@Suite("Backing the store up")
+struct BackupTests {
+
+    private func makeStore(at url: URL) throws {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        for suffix in StoreSetup.storeFileSuffixes {
+            try Data("store\(suffix)".utf8).write(to: URL(filePath: url.path + suffix))
+        }
+    }
+
+    @Test("The copy holds the write-ahead log, not the store alone")
+    func backupHoldsTheWriteAheadLog() throws {
+        let folder = URL.temporaryDirectory.appending(path: "osaifu-wal-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = folder.appending(path: "default.store")
+        try makeStore(at: store)
+
+        let copy = try #require(try StoreSetup.backUpStore(at: store))
+
+        for suffix in StoreSetup.storeFileSuffixes {
+            let file = URL(filePath: copy.path + suffix)
+            #expect(FileManager.default.fileExists(atPath: file.path), "the backup is missing \(suffix)")
+            #expect(try Data(contentsOf: file) == Data("store\(suffix)".utf8))
+        }
+    }
+
+    @Test("Only the newest few copies are kept")
+    func oldCopiesArePruned() throws {
+        let folder = URL.temporaryDirectory.appending(path: "osaifu-prune-\(UUID().uuidString)")
+        let backups = folder.appending(path: "Backups")
+        try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+
+        for day in 1...5 {
+            let copy = backups.appending(path: "default-2026110\(day)T120000Z.store")
+            try Data("old".utf8).write(to: copy)
+            try FileManager.default.setAttributes(
+                [.creationDate: Date(timeIntervalSince1970: TimeInterval(day) * 86_400)],
+                ofItemAtPath: copy.path
+            )
+        }
+
+        try StoreSetup.pruneBackups(in: backups, matching: "default", keeping: 2)
+
+        let left = try FileManager.default.contentsOfDirectory(atPath: backups.path).sorted()
+        #expect(left == ["default-20261104T120000Z.store", "default-20261105T120000Z.store"])
+    }
+
+    @Test("A copy is made only when the schema moved")
+    func copyOnlyWhenTheSchemaMoved() {
+        #expect(StoreSetup.migrationIsExpected(lastOpenedVersion: nil))
+        #expect(StoreSetup.migrationIsExpected(lastOpenedVersion: "2.0.0"))
+        #expect(!StoreSetup.migrationIsExpected(lastOpenedVersion: StoreSetup.currentSchemaVersion))
+        #expect(StoreSetup.currentSchemaVersion == "3.0.0")
+    }
+}
