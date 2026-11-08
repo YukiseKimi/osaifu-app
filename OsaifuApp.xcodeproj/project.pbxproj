@@ -6,6 +6,10 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		50645D802FD98C8100A8E113 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50645D822FD98C8100A8E113 /* OsaifuCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* MyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -35,6 +39,7 @@
 		000000000000000130000000 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				50645D802FD98C8100A8E113 /* OsaifuCore in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -73,6 +78,9 @@
 				000000000000000000000010 /* MyApp */,
 			);
 			name = MyApp;
+			packageProductDependencies = (
+				50645D822FD98C8100A8E113 /* OsaifuCore */,
+			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* MyApp.app */;
 			productType = "com.apple.product-type.application";
@@ -101,6 +109,9 @@
 			);
 			mainGroup = 000000000000000000000001;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				50645D812FD98C8100A8E113 /* XCLocalSwiftPackageReference "OsaifuCore" */,
+			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
 			projectDirPath = "";
@@ -364,6 +375,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		50645D812FD98C8100A8E113 /* XCLocalSwiftPackageReference "OsaifuCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = OsaifuCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		50645D822FD98C8100A8E113 /* OsaifuCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OsaifuCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 000000000000000000000000 /* Project object */;
 }
