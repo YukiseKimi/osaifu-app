@@ -8,6 +8,7 @@ let package = Package(
         .library(name: "OsaifuCore", targets: ["OsaifuCore"])
     ],
     targets: [
-        .target(name: "OsaifuCore")
+        .target(name: "OsaifuCore"),
+        .testTarget(name: "OsaifuCoreTests", dependencies: ["OsaifuCore"])
     ]
 )
