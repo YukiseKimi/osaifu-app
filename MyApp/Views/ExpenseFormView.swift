@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import OsaifuCore
 
 /// A form for creating a new expense or editing an existing one.
 ///

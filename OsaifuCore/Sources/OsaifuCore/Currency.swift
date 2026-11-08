@@ -1,22 +1,27 @@
 import Foundation
 
 /// A selectable currency used to format every amount in the app.
-struct Currency: Identifiable, Hashable {
-    let code: String
-    let symbol: String
+public struct Currency: Identifiable, Hashable, Sendable {
+    public let code: String
+    public let symbol: String
 
-    var id: String { code }
+    public init(code: String, symbol: String) {
+        self.code = code
+        self.symbol = symbol
+    }
+
+    public var id: String { code }
 
     /// The localized currency name, e.g. "Japanese Yen".
-    var localizedName: String {
+    public var localizedName: String {
         Locale.current.localizedString(forCurrencyCode: code) ?? code
     }
 
     /// The currency code used before the user picks one, taken from the device locale.
-    static let defaultCode = Locale.current.currency?.identifier ?? "USD"
+    public static let defaultCode = Locale.current.currency?.identifier ?? "USD"
 
     /// A curated list of common currencies offered in Settings.
-    static let common: [Currency] = [
+    public static let common: [Currency] = [
         Currency(code: "USD", symbol: "$"),
         Currency(code: "EUR", symbol: "€"),
         Currency(code: "GBP", symbol: "£"),

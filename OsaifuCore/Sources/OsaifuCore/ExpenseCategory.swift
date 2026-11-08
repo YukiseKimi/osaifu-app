@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The set of common expense categories the user can choose from.
-enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
+public enum ExpenseCategory: String, CaseIterable, Identifiable, Codable, Sendable {
     case food
     case groceries
     case transport
@@ -14,10 +14,10 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     case travel
     case other
 
-    var id: String { rawValue }
+    public var id: String { rawValue }
 
     /// Human-readable name shown throughout the UI.
-    var title: String {
+    public var title: String {
         switch self {
         case .food: "Food & Dining"
         case .groceries: "Groceries"
@@ -34,7 +34,7 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     }
 
     /// SF Symbol used to represent the category.
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .food: "fork.knife"
         case .groceries: "cart.fill"
@@ -52,7 +52,7 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
 
     /// A vivid, stable color so each category looks the same — and pops — in
     /// every chart, badge, and list.
-    var color: Color {
+    public var color: Color {
         switch self {
         case .food: Color(hex: 0xFF5E5B)
         case .groceries: Color(hex: 0x2ED573)
@@ -69,7 +69,7 @@ enum ExpenseCategory: String, CaseIterable, Identifiable, Codable {
     }
 
     /// A glossy gradient derived from the category color, used for icon badges.
-    var gradient: LinearGradient {
+    public var gradient: LinearGradient {
         LinearGradient(
             colors: [color.mix(with: .white, by: 0.18), color.mix(with: .black, by: 0.12)],
             startPoint: .topLeading,

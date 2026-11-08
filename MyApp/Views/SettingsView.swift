@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import OsaifuCore
 
 /// App preferences: appearance, the display currency, plus developer-friendly
 /// tools for populating and clearing sample data.

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import Charts
+import OsaifuCore
 
 /// The current month at a glance: a donut chart of spending by category, the
 /// running total, and a per-category list. New expenses are added from here.

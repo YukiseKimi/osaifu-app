@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import OsaifuCore
 
 @main
 struct BudgetApp: App {

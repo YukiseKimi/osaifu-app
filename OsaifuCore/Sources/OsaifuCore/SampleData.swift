@@ -3,7 +3,7 @@ import SwiftData
 
 /// Generates randomized example expenses so the charts and lists can be
 /// explored (and sync tested) without manual data entry.
-enum SampleData {
+public enum SampleData {
     /// Plausible per-category amount ranges, to make the sample look realistic.
     private static let typicalAmounts: [ExpenseCategory: ClosedRange<Double>] = [
         .food: 8...45,
@@ -25,7 +25,7 @@ enum SampleData {
     /// Inserts a spread of expenses across the last `monthsBack` months,
     /// including the current month up to today.
     @MainActor
-    static func insert(into context: ModelContext, monthsBack: Int = 6) {
+    public static func insert(into context: ModelContext, monthsBack: Int = 6) {
         let calendar = Calendar.current
         let today = Date.now
 
