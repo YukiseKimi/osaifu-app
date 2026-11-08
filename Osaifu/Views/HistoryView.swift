@@ -7,7 +7,7 @@ import OsaifuCore
 /// per-month, per-category breakdown below it.
 struct HistoryView: View {
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
-    @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
+    @Environment(\.homeCurrencyCode) private var currencyCode
 
     private var summaries: [MonthlySummary] {
         ExpenseAnalytics.monthlySummaries(for: allExpenses, in: currencyCode)

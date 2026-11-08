@@ -10,7 +10,7 @@ import OsaifuCore
 struct ExpenseFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
+    @Environment(\.homeCurrencyCode) private var currencyCode
 
     /// The expense being edited, or `nil` when adding a new one.
     var expense: Expense?

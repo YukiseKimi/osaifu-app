@@ -16,12 +16,25 @@ public enum OsaifuSchemaV2: VersionedSchema {
     public static var models: [any PersistentModel.Type] { [Expense.self] }
 }
 
+/// The third shape: the settings move into the store, as one Preferences row,
+/// so they sync with the expenses.
+public enum OsaifuSchemaV3: VersionedSchema {
+    public static var versionIdentifier: Schema.Version { Schema.Version(3, 0, 0) }
+    public static var models: [any PersistentModel.Type] { [Expense.self, Preferences.self] }
+}
+
 public enum OsaifuMigrationPlan: SchemaMigrationPlan {
     public static var schemas: [any VersionedSchema.Type] {
-        [OsaifuSchemaV1.self, OsaifuSchemaV2.self]
+        [OsaifuSchemaV1.self, OsaifuSchemaV2.self, OsaifuSchemaV3.self]
     }
 
-    public static var stages: [MigrationStage] { [v1ToV2] }
+    public static var stages: [MigrationStage] { [v1ToV2, v2ToV3] }
+
+    /// A new model type is additive, so this stage needs no code.
+    static let v2ToV3 = MigrationStage.lightweight(
+        fromVersion: OsaifuSchemaV2.self,
+        toVersion: OsaifuSchemaV3.self
+    )
 
     /// The new properties arrive with their defaults, then this stage fills the
     /// minor units from each old `Double` amount.

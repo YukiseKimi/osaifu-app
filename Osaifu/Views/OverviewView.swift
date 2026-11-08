@@ -7,7 +7,7 @@ import OsaifuCore
 /// running total, and a per-category list. New expenses are added from here.
 struct OverviewView: View {
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
-    @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
+    @Environment(\.homeCurrencyCode) private var currencyCode
     @State private var isAddingExpense = false
 
     private var monthExpenses: [Expense] {
@@ -20,6 +20,11 @@ struct OverviewView: View {
 
     private var monthTotal: Money {
         Money.sum(monthExpenses.map(\.money), in: currencyCode)
+    }
+
+    /// Expenses that another currency keeps out of the total.
+    private var otherCurrencies: [Expense] {
+        ExpenseAnalytics.inOtherCurrencies(monthExpenses, than: currencyCode)
     }
 
     /// Color used for the glow halo behind the donut (largest category).
@@ -60,6 +65,23 @@ struct OverviewView: View {
             Section("Categories") {
                 ForEach(categoryTotals) { item in
                     CategoryRow(item: item, monthTotal: monthTotal)
+                }
+            }
+            if !otherCurrencies.isEmpty {
+                Section {
+                    ForEach(otherCurrencies) { expense in
+                        HStack(spacing: 12) {
+                            CategoryIcon(category: expense.category, size: 30)
+                            Text(expense.category.title)
+                            Spacer()
+                            Text(expense.money.formatted())
+                                .monospacedDigit()
+                        }
+                    }
+                } header: {
+                    Text("Other Currencies")
+                } footer: {
+                    Text("These are left out of the total, because a total of two currencies would be wrong.")
                 }
             }
         }

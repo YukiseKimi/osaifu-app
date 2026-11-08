@@ -28,10 +28,19 @@ struct OsaifuApp: App {
 
 /// The top-level tab interface, shared across iOS and macOS.
 struct RootView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var preferences: [Preferences]
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
 
     private var appearance: AppearanceMode {
         AppearanceMode(rawValue: appearanceRaw) ?? .system
+    }
+
+    /// The newest settings row wins, so two devices agree. Before the first row
+    /// exists, the currency the first version of the app displayed wins.
+    private var homeCurrencyCode: String {
+        let code = preferences.max { $0.updatedAt < $1.updatedAt }?.homeCurrencyCode ?? ""
+        return code.isEmpty ? Preferences.legacyCurrencyCode() : code
     }
 
     var body: some View {
@@ -52,6 +61,15 @@ struct RootView: View {
         .tint(.appAccent)
         // System follows the device; Light/Dark force a scheme app-wide.
         .preferredColorScheme(appearance.colorScheme)
+        .environment(\.homeCurrencyCode, homeCurrencyCode)
+        .task {
+            // Makes the one settings row, and drops any duplicate that iCloud
+            // delivered from another device.
+            _ = try? Preferences.current(
+                in: modelContext,
+                fallbackCurrencyCode: Preferences.legacyCurrencyCode()
+            )
+        }
     }
 }
 

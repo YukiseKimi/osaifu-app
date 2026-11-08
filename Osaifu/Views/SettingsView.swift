@@ -6,7 +6,7 @@ import OsaifuCore
 /// tools for populating and clearing sample data.
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
+    @Environment(\.homeCurrencyCode) private var currencyCode
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
     @Query private var expenses: [Expense]
 
@@ -32,13 +32,17 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.segmented)
                 }
-                Section("Currency") {
-                    Picker("Currency", selection: $currencyCode) {
+                Section {
+                    Picker("Home currency", selection: homeCurrency) {
                         ForEach(currencies) { currency in
                             Text("\(currency.symbol)  \(currency.code) — \(currency.localizedName)")
                                 .tag(currency.code)
                         }
                     }
+                } header: {
+                    Text("Currency")
+                } footer: {
+                    Text("Totals and budgets use the home currency. An expense keeps the currency you entered it in.")
                 }
                 Section("Preview") {
                     LabeledContent("Example", value: Money(minorUnits: 123456, currencyCode: currencyCode).formatted())
@@ -74,6 +78,17 @@ struct SettingsView: View {
                 Text("This permanently removes every expense and can't be undone.")
             }
         }
+    }
+
+    /// Writes the pick to the synced settings row.
+    private var homeCurrency: Binding<String> {
+        Binding(
+            get: { currencyCode },
+            set: { code in
+                guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: code) else { return }
+                row.setHomeCurrencyCode(code)
+            }
+        )
     }
 
     private func deleteAll() {
