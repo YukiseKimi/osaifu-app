@@ -46,7 +46,7 @@ struct OverviewView: View {
             .navigationTitle("This Month")
             .toolbar {
                 ToolbarItem(placement: .navigation) {
-                    SyncBadge(account: sync.account)
+                    SyncBadge(account: sync.account, isConnecting: sync.isConnecting)
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add Expense", systemImage: "plus") {
@@ -62,7 +62,7 @@ struct OverviewView: View {
 
     private var content: some View {
         List {
-            if !sync.account.syncs && sync.account != .unknown {
+            if sync.showsNotice {
                 Section {
                     SyncNotice(account: sync.account)
                 }

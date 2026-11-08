@@ -48,9 +48,10 @@ struct SettingsView: View {
                 Section {
                     LabeledContent("Sync") {
                         HStack(spacing: 6) {
-                            SyncBadge(account: sync.account)
+                            SyncBadge(account: sync.account, isConnecting: sync.isConnecting)
                             Text(sync.title)
                                 .foregroundStyle(sync.account.syncs ? Color.green : .secondary)
+                                .accessibilityIdentifier("syncTitle")
                         }
                     }
                     LabeledContent("Last change") {

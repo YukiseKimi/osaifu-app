@@ -24,17 +24,40 @@ public enum CloudAccount: Equatable, Sendable {
 public enum SyncStatus {
 
     /// The account state of the app's CloudKit container.
-    public static func account(containerID: String = StoreSetup.cloudContainerID) async -> CloudAccount {
-        do {
-            switch try await CKContainer(identifier: containerID).accountStatus() {
-            case .available: return .available
-            case .noAccount: return .noAccount
-            case .restricted: return .restricted
-            case .couldNotDetermine, .temporarilyUnavailable: return .unknown
-            @unknown default: return .unknown
+    ///
+    /// iCloud does not always answer. On a machine with no account and no
+    /// reachable container the call can hang, which once left the badge saying
+    /// "connecting" for as long as the app was open, so the read gives up.
+    public static func account(
+        containerID: String = StoreSetup.cloudContainerID,
+        timeout: Duration = .seconds(5)
+    ) async -> CloudAccount {
+        await withTaskGroup(of: CloudAccount?.self) { group in
+            group.addTask {
+                do {
+                    return state(for: try await CKContainer(identifier: containerID).accountStatus())
+                } catch {
+                    return .unknown
+                }
             }
-        } catch {
-            return .unknown
+            group.addTask {
+                try? await Task.sleep(for: timeout)
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first ?? .unknown
+        }
+    }
+
+    /// What one of CloudKit's statuses means for the app.
+    static func state(for status: CKAccountStatus) -> CloudAccount {
+        switch status {
+        case .available: .available
+        case .noAccount: .noAccount
+        case .restricted: .restricted
+        case .couldNotDetermine, .temporarilyUnavailable: .unknown
+        @unknown default: .unknown
         }
     }
 

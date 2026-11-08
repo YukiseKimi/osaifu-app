@@ -7,28 +7,27 @@ import OsaifuCore
 struct SyncBadge: View {
     let account: CloudAccount
 
+    /// True only while the first read is still out. A read that finished and
+    /// said nothing is "not connected": the expenses are going nowhere, and
+    /// a badge that says "connecting" for ever tells the user nothing.
+    var isConnecting: Bool = false
+
     private var symbol: String {
-        switch account {
-        case .available: "checkmark.icloud.fill"
-        case .unknown: "arrow.clockwise.icloud.fill"
-        case .noAccount, .restricted: "icloud.slash.fill"
-        }
+        if isConnecting { return "arrow.clockwise.icloud.fill" }
+        return account.syncs ? "checkmark.icloud.fill" : "icloud.slash.fill"
     }
 
     private var tint: Color {
-        switch account {
-        case .available: .green
-        case .unknown: .secondary
-        case .noAccount, .restricted: .orange
-        }
+        if isConnecting { return .secondary }
+        return account.syncs ? .green : .orange
     }
 
     private var label: LocalizedStringKey {
+        if isConnecting { return "iCloud: connecting" }
         switch account {
-        case .available: "iCloud: connected"
-        case .unknown: "iCloud: connecting"
-        case .noAccount: "iCloud: not connected"
-        case .restricted: "iCloud: not allowed"
+        case .available: return "iCloud: connected"
+        case .restricted: return "iCloud: not allowed"
+        case .noAccount, .unknown: return "iCloud: not connected"
         }
     }
 
@@ -36,7 +35,7 @@ struct SyncBadge: View {
         Image(systemName: symbol)
             .font(.footnote)
             .foregroundStyle(tint)
-            .symbolEffect(.pulse, isActive: account == .unknown)
+            .symbolEffect(.pulse, isActive: isConnecting)
             .accessibilityLabel(label)
     }
 }
@@ -46,7 +45,7 @@ struct SyncNotice: View {
     let account: CloudAccount
 
     var body: some View {
-        if !account.syncs && account != .unknown {
+        if !account.syncs {
             HStack(spacing: 8) {
                 SyncBadge(account: account)
                 Text("This device only. Sign in to iCloud to see these expenses on your other devices.")
@@ -60,6 +59,7 @@ struct SyncNotice: View {
 
 #Preview {
     VStack(alignment: .leading, spacing: 16) {
+        HStack { SyncBadge(account: .unknown, isConnecting: true); Text("connecting") }
         ForEach([CloudAccount.available, .unknown, .noAccount, .restricted], id: \.self) { account in
             HStack { SyncBadge(account: account); Text(String(describing: account)) }
         }

@@ -1,4 +1,5 @@
 import Testing
+import CloudKit
 import Foundation
 import SwiftData
 @testable import OsaifuCore
@@ -33,4 +34,25 @@ struct SyncStatusTests {
         #expect(!CloudAccount.restricted.syncs)
         #expect(!CloudAccount.unknown.syncs)
     }
+}
+
+@Suite("The iCloud account read")
+struct CloudAccountTests {
+
+    @Test("Each CloudKit status maps to one state", arguments: [
+        (CKAccountStatus.available, CloudAccount.available),
+        (.noAccount, .noAccount),
+        (.restricted, .restricted),
+        (.couldNotDetermine, .unknown),
+        (.temporarilyUnavailable, .unknown)
+    ])
+    func statusMapping(status: CKAccountStatus, state: CloudAccount) {
+        #expect(SyncStatus.state(for: status) == state)
+    }
+
+    // No test calls SyncStatus.account() itself. CKContainer(identifier:)
+    // traps in a process that the container is not in the entitlements of,
+    // which takes the whole test run down with signal 5. The timeout in that
+    // function is checked in the running app instead.
+
 }
