@@ -3,7 +3,7 @@ import SwiftData
 import OsaifuCore
 
 @main
-struct BudgetApp: App {
+struct OsaifuApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
