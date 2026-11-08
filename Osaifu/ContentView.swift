@@ -30,6 +30,8 @@ struct OsaifuApp: App {
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var preferences: [Preferences]
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var sync = SyncMonitor()
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
 
     private var appearance: AppearanceMode {
@@ -62,6 +64,7 @@ struct RootView: View {
         // System follows the device; Light/Dark force a scheme app-wide.
         .preferredColorScheme(appearance.colorScheme)
         .environment(\.homeCurrencyCode, homeCurrencyCode)
+        .environment(sync)
         .task {
             // Makes the one settings row, and drops any duplicate that iCloud
             // delivered from another device.
@@ -69,6 +72,11 @@ struct RootView: View {
                 in: modelContext,
                 fallbackCurrencyCode: Preferences.legacyCurrencyCode()
             )
+            await sync.refresh(context: modelContext)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await sync.refresh(context: modelContext) }
         }
     }
 }

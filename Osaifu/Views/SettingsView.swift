@@ -6,6 +6,7 @@ import OsaifuCore
 /// tools for populating and clearing sample data.
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(SyncMonitor.self) private var sync
     @Environment(\.homeCurrencyCode) private var currencyCode
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
     @Query private var expenses: [Expense]
@@ -43,6 +44,23 @@ struct SettingsView: View {
                     Text("Currency")
                 } footer: {
                     Text("Totals and budgets use the home currency. An expense keeps the currency you entered it in.")
+                }
+                Section {
+                    LabeledContent("Sync") {
+                        Text(sync.title)
+                            .foregroundStyle(sync.account.syncs ? Color.green : .secondary)
+                    }
+                    LabeledContent("Last change") {
+                        if let lastChange = sync.lastChange {
+                            Text(lastChange, format: .relative(presentation: .named))
+                        } else {
+                            Text("No expenses yet")
+                        }
+                    }
+                } header: {
+                    Text("iCloud")
+                } footer: {
+                    Text("Osaifu keeps your expenses in your private iCloud database. iCloud decides when it sends them, so a change can take a moment to reach another device.")
                 }
                 Section("Preview") {
                     LabeledContent("Example", value: Money(minorUnits: 123456, currencyCode: currencyCode).formatted())
