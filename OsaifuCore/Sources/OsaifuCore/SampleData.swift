@@ -25,7 +25,11 @@ public enum SampleData {
     /// Inserts a spread of expenses across the last `monthsBack` months,
     /// including the current month up to today.
     @MainActor
-    public static func insert(into context: ModelContext, monthsBack: Int = 6) {
+    public static func insert(
+        into context: ModelContext,
+        currencyCode: String = Currency.defaultCode,
+        monthsBack: Int = 6
+    ) {
         let calendar = Calendar.current
         let today = Date.now
 
@@ -39,11 +43,12 @@ public enum SampleData {
             for _ in 0..<Int.random(in: 6...12) {
                 let category = ExpenseCategory.allCases.randomElement() ?? .other
                 let range = typicalAmounts[category] ?? 5...100
-                let amount = (Double.random(in: range) * 100).rounded() / 100
+                let amount = Double.random(in: range)
                 let day = Int.random(in: 1...max(1, maxDay))
                 let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) ?? startOfMonth
                 let note = sampleNotes.randomElement() ?? ""
-                context.insert(Expense(amount: amount, category: category, note: note, date: date))
+                let money = Money(decimal: Decimal(amount), currencyCode: currencyCode)
+                context.insert(Expense(money: money, category: category, note: note, date: date))
             }
         }
     }

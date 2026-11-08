@@ -41,11 +41,11 @@ struct SettingsView: View {
                     }
                 }
                 Section("Preview") {
-                    LabeledContent("Example", value: 1234.56.currencyFormatted(code: currencyCode))
+                    LabeledContent("Example", value: Money(minorUnits: 123456, currencyCode: currencyCode).formatted())
                 }
                 Section {
                     Button {
-                        SampleData.insert(into: modelContext)
+                        SampleData.insert(into: modelContext, currencyCode: currencyCode)
                     } label: {
                         Label("Add Sample Data", systemImage: "wand.and.stars")
                     }

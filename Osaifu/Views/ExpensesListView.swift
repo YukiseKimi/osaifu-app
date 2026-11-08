@@ -6,7 +6,6 @@ import OsaifuCore
 /// newest month first. Tap a row to edit it; swipe to delete.
 struct ExpensesListView: View {
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
 
     @State private var expenseToEdit: Expense?
@@ -35,7 +34,7 @@ struct ExpensesListView: View {
                                     Button {
                                         expenseToEdit = expense
                                     } label: {
-                                        ExpenseRow(expense: expense, currencyCode: currencyCode)
+                                        ExpenseRow(expense: expense)
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -68,7 +67,6 @@ struct ExpensesListView: View {
 /// A single expense row: category icon, title, optional note, amount, and date.
 private struct ExpenseRow: View {
     let expense: Expense
-    let currencyCode: String
 
     var body: some View {
         HStack(spacing: 12) {
@@ -83,7 +81,7 @@ private struct ExpenseRow: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
-                Text(expense.amount.currencyFormatted(code: currencyCode))
+                Text(expense.money.formatted())
                     .monospacedDigit()
                 Text(expense.date, format: .dateTime.month(.abbreviated).day())
                     .font(.caption)

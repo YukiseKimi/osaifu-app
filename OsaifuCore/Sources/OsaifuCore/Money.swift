@@ -37,6 +37,12 @@ public struct Money: Hashable, Sendable {
         )
     }
 
+    /// The amount as a Double, for a chart axis only. Never add these: a
+    /// Double drifts, which is why the store keeps minor units.
+    public var plotValue: Double {
+        NSDecimalNumber(decimal: decimalValue).doubleValue
+    }
+
     /// The amount in the reader's locale, with the currency symbol.
     public func formatted() -> String {
         decimalValue.formatted(.currency(code: currencyCode))

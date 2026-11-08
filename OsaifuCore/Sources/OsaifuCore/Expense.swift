@@ -58,15 +58,4 @@ public final class Expense {
         self.updatedAt = now
     }
 
-    /// Takes a Double in the device's currency. The next commit removes it.
-    @available(*, deprecated, message: "Use init(money:category:note:date:)")
-    public convenience init(amount: Double, category: ExpenseCategory, note: String = "", date: Date = .now) {
-        self.init(
-            money: Money(decimal: Decimal(amount), currencyCode: Currency.defaultCode),
-            category: category,
-            note: note,
-            date: date
-        )
-        self.amount = amount
-    }
 }

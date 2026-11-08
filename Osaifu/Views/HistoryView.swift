@@ -10,11 +10,11 @@ struct HistoryView: View {
     @AppStorage("currencyCode") private var currencyCode = Currency.defaultCode
 
     private var summaries: [MonthlySummary] {
-        ExpenseAnalytics.monthlySummaries(for: allExpenses)
+        ExpenseAnalytics.monthlySummaries(for: allExpenses, in: currencyCode)
     }
 
     private var chartRows: [MonthlyCategoryTotal] {
-        ExpenseAnalytics.monthlyCategoryTotals(for: allExpenses)
+        ExpenseAnalytics.monthlyCategoryTotals(for: allExpenses, in: currencyCode)
     }
 
     /// Categories that actually appear in the data, in a stable order, so the
@@ -47,14 +47,14 @@ struct HistoryView: View {
                                         CategoryIcon(category: item.category, size: 30)
                                         Text(item.category.title)
                                         Spacer()
-                                        Text(item.total.currencyFormatted(code: currencyCode))
+                                        Text(item.total.formatted())
                                             .monospacedDigit()
                                     }
                                 }
                                 HStack {
                                     Text("Total").bold()
                                     Spacer()
-                                    Text(summary.total.currencyFormatted(code: currencyCode))
+                                    Text(summary.total.formatted())
                                         .bold()
                                         .monospacedDigit()
                                 }
@@ -72,7 +72,7 @@ struct HistoryView: View {
         Chart(chartRows) { row in
             BarMark(
                 x: .value("Month", row.monthStart, unit: .month),
-                y: .value("Amount", row.total)
+                y: .value("Amount", row.total.plotValue)
             )
             .foregroundStyle(by: .value("Category", row.category.title))
             .cornerRadius(4)

@@ -15,11 +15,11 @@ struct OverviewView: View {
     }
 
     private var categoryTotals: [CategoryTotal] {
-        ExpenseAnalytics.categoryTotals(for: monthExpenses)
+        ExpenseAnalytics.categoryTotals(for: monthExpenses, in: currencyCode)
     }
 
-    private var monthTotal: Double {
-        monthExpenses.reduce(0) { $0 + $1.amount }
+    private var monthTotal: Money {
+        Money.sum(monthExpenses.map(\.money), in: currencyCode)
     }
 
     /// Color used for the glow halo behind the donut (largest category).
@@ -59,7 +59,7 @@ struct OverviewView: View {
             }
             Section("Categories") {
                 ForEach(categoryTotals) { item in
-                    CategoryRow(item: item, monthTotal: monthTotal, currencyCode: currencyCode)
+                    CategoryRow(item: item, monthTotal: monthTotal)
                 }
             }
         }
@@ -72,7 +72,7 @@ struct OverviewView: View {
                 .foregroundStyle(.secondary)
             Chart(categoryTotals) { item in
                 SectorMark(
-                    angle: .value("Amount", item.total),
+                    angle: .value("Amount", item.total.plotValue),
                     innerRadius: .ratio(0.62),
                     angularInset: 1.5
                 )
@@ -100,7 +100,7 @@ struct OverviewView: View {
                     Text("Total")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(monthTotal.currencyFormatted(code: currencyCode))
+                    Text(monthTotal.formatted())
                         .font(.title2.bold())
                         .glow(glowColor, radius: 4)
                 }
@@ -125,11 +125,10 @@ struct OverviewView: View {
 /// the month's total, and its amount.
 private struct CategoryRow: View {
     let item: CategoryTotal
-    let monthTotal: Double
-    let currencyCode: String
+    let monthTotal: Money
 
     private var share: Double {
-        monthTotal > 0 ? item.total / monthTotal : 0
+        monthTotal.minorUnits > 0 ? Double(item.total.minorUnits) / Double(monthTotal.minorUnits) : 0
     }
 
     var body: some View {
@@ -142,7 +141,7 @@ private struct CategoryRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text(item.total.currencyFormatted(code: currencyCode))
+            Text(item.total.formatted())
                 .monospacedDigit()
         }
     }
