@@ -10,6 +10,7 @@ struct BudgetsView: View {
     @Query private var budgets: [Budget]
     @Query private var preferences: [Preferences]
     @Query private var rates: [ExchangeRate]
+    @State private var isEditingLimit = false
 
     /// The newest limit the user has not removed.
     private var budget: Budget? {
@@ -59,7 +60,23 @@ struct BudgetsView: View {
             }
             .moodBackground()
             .navigationTitle("Budget")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(budget == nil ? "Set a Limit" : "Edit", systemImage: budget == nil ? "plus" : "pencil") {
+                        isEditingLimit = true
+                    }
+                }
+            }
+            .sheet(isPresented: $isEditingLimit) {
+                BudgetLimitView(budget: latestBudget)
+            }
         }
+    }
+
+    /// The row to edit, even when the user removed its limit, so the amount
+    /// they had comes back in the field.
+    private var latestBudget: Budget? {
+        budgets.max { $0.updatedAt < $1.updatedAt }
     }
 
     private func content(_ progress: BudgetProgress) -> some View {
@@ -94,6 +111,9 @@ struct BudgetsView: View {
             Label("No Monthly Limit", systemImage: "target")
         } description: {
             Text("Set a limit for the month and this screen shows what is left of it.")
+        } actions: {
+            Button("Set a Limit") { isEditingLimit = true }
+                .buttonStyle(.borderedProminent)
         }
     }
 }
