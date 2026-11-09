@@ -85,6 +85,38 @@ public enum ExpenseAnalytics {
         }
     }
 
+    /// The categories this user picks most, most used first.
+    ///
+    /// It counts the expenses of the last `days` days, so a change of habit
+    /// shows within a month. When those do not fill `limit` places, the rest
+    /// of the list follows in its own order, so the pad always has four
+    /// chips to show, even on a first launch.
+    public static func favouriteCategories(
+        for expenses: [Expense],
+        within days: Int = 30,
+        limit: Int = 4,
+        now: Date = .now,
+        calendar: Calendar = .current
+    ) -> [ExpenseCategory] {
+        let since = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+        let counts = expenses
+            .filter { $0.date >= since && $0.date <= now }
+            .reduce(into: [ExpenseCategory: Int]()) { counts, expense in
+                counts[expense.category, default: 0] += 1
+            }
+
+        let used = counts
+            .sorted { left, right in
+                left.value == right.value
+                    ? left.key.rawValue < right.key.rawValue
+                    : left.value > right.value
+            }
+            .map(\.key)
+
+        let rest = ExpenseCategory.allCases.filter { !used.contains($0) }
+        return Array((used + rest).prefix(limit))
+    }
+
     /// The first instant of the calendar month containing `date`.
     public static func startOfMonth(_ date: Date, calendar: Calendar = .current) -> Date {
         calendar.date(from: calendar.dateComponents([.year, .month], from: date)) ?? date
