@@ -145,6 +145,16 @@ struct OverviewView: View {
     }
 
     private var emptyState: some View {
+        // The budget line belongs here too: a month with no expense yet is
+        // exactly when "you have this much to spend" is worth reading.
+        VStack(spacing: 20) {
+            BudgetLine()
+                .padding(.horizontal)
+            emptyMessage
+        }
+    }
+
+    private var emptyMessage: some View {
         ContentUnavailableView {
             Label("No Expenses Yet", systemImage: "chart.pie")
         } description: {
