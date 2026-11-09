@@ -13,31 +13,12 @@ struct BudgetsView: View {
     @State private var isEditingLimit = false
 
     /// The newest limit the user has not removed.
-    private var budget: Budget? {
-        budgets.filter(\.isActive).max { $0.updatedAt < $1.updatedAt }
-    }
-
-    private var settings: Preferences? {
-        preferences.max { $0.updatedAt < $1.updatedAt }
-    }
-
-    private var rateByCurrency: [String: Decimal] {
-        Dictionary(
-            rates.filter { $0.homeCurrencyCode == currencyCode && $0.isSet }
-                .map { ($0.currencyCode, $0.rate) },
-            uniquingKeysWith: { first, _ in first }
-        )
-    }
+    private var budget: Budget? { BudgetReader.activeBudget(budgets) }
 
     private var progress: BudgetProgress? {
-        guard let budget else { return nil }
-        return ExpenseAnalytics.progress(
-            limit: budget.limit,
-            expenses: allExpenses,
-            month: .now,
-            carriesRemainderOver: settings?.carriesRemainderOver ?? false,
-            countsForeignSpend: settings?.countsForeignSpend ?? false,
-            rates: rateByCurrency
+        BudgetReader.progress(
+            expenses: allExpenses, budgets: budgets, preferences: preferences,
+            rates: rates, homeCurrencyCode: currencyCode
         )
     }
 

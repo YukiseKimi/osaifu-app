@@ -69,6 +69,9 @@ struct OverviewView: View {
                 .listRowBackground(Color.clear)
             }
             Section {
+                BudgetLine()
+            }
+            Section {
                 chart
                     .listRowBackground(Color.clear)
             }
