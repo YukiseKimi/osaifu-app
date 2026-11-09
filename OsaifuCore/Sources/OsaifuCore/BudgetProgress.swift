@@ -13,6 +13,14 @@ public struct BudgetProgress: Sendable, Equatable {
     /// Expenses this month that no rate could convert, so they are left out.
     public let leftOutCount: Int
 
+    public init(baseLimit: Money, carriedOver: Money, limit: Money, spent: Money, leftOutCount: Int) {
+        self.baseLimit = baseLimit
+        self.carriedOver = carriedOver
+        self.limit = limit
+        self.spent = spent
+        self.leftOutCount = leftOutCount
+    }
+
     /// What is left. It goes negative once the month is over its limit.
     public var remaining: Money {
         Money(minorUnits: limit.minorUnits - spent.minorUnits, currencyCode: limit.currencyCode)
