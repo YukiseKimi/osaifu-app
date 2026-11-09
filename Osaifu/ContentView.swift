@@ -50,6 +50,9 @@ struct RootView: View {
             Tab("Overview", systemImage: "chart.pie.fill") {
                 OverviewView()
             }
+            Tab("Budget", systemImage: "target") {
+                BudgetsView()
+            }
             Tab("Expenses", systemImage: "list.bullet") {
                 ExpensesListView()
             }
