@@ -189,8 +189,8 @@ struct BackupTests {
     @Test("A copy is made only when the schema moved")
     func copyOnlyWhenTheSchemaMoved() {
         #expect(StoreSetup.migrationIsExpected(lastOpenedVersion: nil))
-        #expect(StoreSetup.migrationIsExpected(lastOpenedVersion: "2.0.0"))
+        #expect(StoreSetup.migrationIsExpected(lastOpenedVersion: "3.0.0"))
         #expect(!StoreSetup.migrationIsExpected(lastOpenedVersion: StoreSetup.currentSchemaVersion))
-        #expect(StoreSetup.currentSchemaVersion == "3.0.0")
+        #expect(StoreSetup.currentSchemaVersion == "4.0.0")
     }
 }

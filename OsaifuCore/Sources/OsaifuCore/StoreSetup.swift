@@ -29,7 +29,7 @@ public enum StoreSetup {
     /// The configuration carries no URL, so SwiftData picks its own default
     /// location, and the backup reads that same location back from it.
     public static func makeContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: OsaifuSchemaV3.self)
+        let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
         let ownToTheApp = ModelConfiguration(
             schema: schema,
             cloudKitDatabase: .private(cloudContainerID)
@@ -70,7 +70,7 @@ public enum StoreSetup {
 
     /// The schema this build knows, as "3.0.0".
     public static var currentSchemaVersion: String {
-        let version = OsaifuSchemaV3.versionIdentifier
+        let version = OsaifuSchemaV4.versionIdentifier
         return "\(version.major).\(version.minor).\(version.patch)"
     }
 
@@ -147,7 +147,7 @@ public enum StoreSetup {
 
     /// A store that lives in memory, for previews and tests.
     public static func makeInMemoryContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: OsaifuSchemaV3.self)
+        let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
         return try ModelContainer(
             for: schema,
             configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

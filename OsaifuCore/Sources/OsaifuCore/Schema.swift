@@ -23,12 +23,25 @@ public enum OsaifuSchemaV3: VersionedSchema {
     public static var models: [any PersistentModel.Type] { [Expense.self, Preferences.self] }
 }
 
+/// The fourth shape: the monthly limit joins the store, so it syncs with the
+/// expenses and the settings.
+public enum OsaifuSchemaV4: VersionedSchema {
+    public static var versionIdentifier: Schema.Version { Schema.Version(4, 0, 0) }
+    public static var models: [any PersistentModel.Type] { [Expense.self, Preferences.self, Budget.self] }
+}
+
 public enum OsaifuMigrationPlan: SchemaMigrationPlan {
     public static var schemas: [any VersionedSchema.Type] {
-        [OsaifuSchemaV1.self, OsaifuSchemaV2.self, OsaifuSchemaV3.self]
+        [OsaifuSchemaV1.self, OsaifuSchemaV2.self, OsaifuSchemaV3.self, OsaifuSchemaV4.self]
     }
 
-    public static var stages: [MigrationStage] { [v1ToV2, v2ToV3] }
+    public static var stages: [MigrationStage] { [v1ToV2, v2ToV3, v3ToV4] }
+
+    /// A new model type is additive, so this stage needs no code either.
+    static let v3ToV4 = MigrationStage.lightweight(
+        fromVersion: OsaifuSchemaV3.self,
+        toVersion: OsaifuSchemaV4.self
+    )
 
     /// A new model type is additive, so this stage needs no code.
     static let v2ToV3 = MigrationStage.lightweight(
