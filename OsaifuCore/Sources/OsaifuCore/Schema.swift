@@ -27,7 +27,9 @@ public enum OsaifuSchemaV3: VersionedSchema {
 /// expenses and the settings.
 public enum OsaifuSchemaV4: VersionedSchema {
     public static var versionIdentifier: Schema.Version { Schema.Version(4, 0, 0) }
-    public static var models: [any PersistentModel.Type] { [Expense.self, Preferences.self, Budget.self] }
+    public static var models: [any PersistentModel.Type] {
+        [Expense.self, Preferences.self, Budget.self, ExchangeRate.self]
+    }
 }
 
 public enum OsaifuMigrationPlan: SchemaMigrationPlan {

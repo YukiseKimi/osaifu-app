@@ -80,7 +80,9 @@ public struct Money: Hashable, Sendable {
         self.init(decimal: value, currencyCode: currencyCode)
     }
 
-    static func decimal(fromTyped text: String, locale: Locale) -> Decimal? {
+    /// Reads a typed decimal in the reader's locale, with no truncation. It
+    /// is public because a typed exchange rate needs the same care.
+    public static func decimal(fromTyped text: String, locale: Locale = .current) -> Decimal? {
         var cleaned = text.filter { !$0.isWhitespace }
         guard !cleaned.isEmpty else { return nil }
 

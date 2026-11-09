@@ -9,11 +9,29 @@ public final class Preferences {
     /// currency it was entered in, which can differ from this one.
     public var homeCurrencyCode: String = ""
 
+    /// Off: each month starts at the full limit. On: what was left of last
+    /// month is added to this month's limit.
+    public var carriesRemainderOver: Bool = false
+
+    /// Off: an expense in another currency is left out of the totals and the
+    /// budget, as it is today. On: it is converted with the rate the user gave.
+    public var countsForeignSpend: Bool = false
+
     public var updatedAt: Date = Date.now
 
     public init(homeCurrencyCode: String) {
         self.homeCurrencyCode = homeCurrencyCode
         self.updatedAt = .now
+    }
+
+    public func setCarriesRemainderOver(_ on: Bool) {
+        carriesRemainderOver = on
+        updatedAt = .now
+    }
+
+    public func setCountsForeignSpend(_ on: Bool) {
+        countsForeignSpend = on
+        updatedAt = .now
     }
 
     public func setHomeCurrencyCode(_ code: String) {

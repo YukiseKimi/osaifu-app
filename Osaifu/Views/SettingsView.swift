@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Environment(\.homeCurrencyCode) private var currencyCode
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
     @Query private var expenses: [Expense]
+    @Query private var rates: [ExchangeRate]
 
     @State private var showingDeleteConfirmation = false
 
@@ -66,6 +67,30 @@ struct SettingsView: View {
                 } footer: {
                     Text("Osaifu keeps your expenses in your private iCloud database. iCloud decides when it sends them, so a change can take a moment to reach another device.")
                 }
+                Section {
+                    Toggle("Carry what is left over", isOn: carriesRemainderOver)
+                } header: {
+                    Text("Budget")
+                } footer: {
+                    Text("Off, each month starts at the full limit. On, what was left of last month is added to this month.")
+                }
+                Section {
+                    Toggle("Count other currencies", isOn: countsForeignSpend)
+                    if countsForeignSpend.wrappedValue {
+                        if foreignCurrencies.isEmpty {
+                            Text("No expense is in another currency yet.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(foreignCurrencies, id: \.self) { code in
+                                ExchangeRateRow(currencyCode: code, homeCurrencyCode: currencyCode)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("FX Currency")
+                } footer: {
+                    Text("Off, an expense in another currency stays out of the totals and the budget. On, it is counted at the rate you give. Nothing is fetched.")
+                }
                 Section("Preview") {
                     LabeledContent("Example", value: Money(minorUnits: 123456, currencyCode: currencyCode).formatted())
                 }
@@ -100,6 +125,33 @@ struct SettingsView: View {
                 Text("This permanently removes every expense and can't be undone.")
             }
         }
+    }
+
+    /// The currencies the expenses are in, other than the home one.
+    private var foreignCurrencies: [String] {
+        Set(expenses.map(\.currencyCode))
+            .subtracting([currencyCode, ""])
+            .sorted()
+    }
+
+    private var carriesRemainderOver: Binding<Bool> {
+        Binding(
+            get: { (try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode))?.carriesRemainderOver ?? false },
+            set: { on in
+                guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode) else { return }
+                row.setCarriesRemainderOver(on)
+            }
+        )
+    }
+
+    private var countsForeignSpend: Binding<Bool> {
+        Binding(
+            get: { (try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode))?.countsForeignSpend ?? false },
+            set: { on in
+                guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode) else { return }
+                row.setCountsForeignSpend(on)
+            }
+        )
     }
 
     /// Writes the pick to the synced settings row.
