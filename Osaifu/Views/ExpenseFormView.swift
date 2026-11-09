@@ -15,6 +15,10 @@ struct ExpenseFormView: View {
     /// The expense being edited, or `nil` when adding a new one.
     var expense: Expense?
 
+    /// What the pad already holds, when the user taps More.
+    var initialAmountText: String = ""
+    var initialCategory: ExpenseCategory?
+
     @State private var amountText: String = ""
     @State private var category: ExpenseCategory = .food
     @State private var date: Date = .now
@@ -79,7 +83,11 @@ struct ExpenseFormView: View {
     private func loadIfNeeded() {
         guard !hasLoaded else { return }
         hasLoaded = true
-        guard let expense else { return }
+        guard let expense else {
+            amountText = initialAmountText
+            if let initialCategory { category = initialCategory }
+            return
+        }
         amountText = expense.money.decimalValue.formatted(.number.grouping(.never))
         editingCurrency = expense.currencyCode
         category = expense.category

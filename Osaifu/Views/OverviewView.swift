@@ -55,7 +55,7 @@ struct OverviewView: View {
                 }
             }
             .sheet(isPresented: $isAddingExpense) {
-                ExpenseFormView()
+                QuickEntryView()
             }
         }
     }
