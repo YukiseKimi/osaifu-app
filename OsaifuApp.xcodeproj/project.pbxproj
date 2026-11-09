@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5055BD3A30A208F300F87346 /* OsaifuWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50645D802FD98C8100A8E113 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50645D822FD98C8100A8E113 /* OsaifuCore */; };
+		509772CE30A20A0800552730 /* OsaifuWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50DA588930A208CA00A2C055 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50DA588830A208CA00A2C055 /* OsaifuCore */; };
 /* End PBXBuildFile section */
 
@@ -23,12 +23,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		501C376E30A208E600CAB832 /* Embed Foundation Extensions */ = {
+		50873D6530A20A0600C29A65 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
-			dstSubfolder = Product;
+			dstPath = "";
+			dstSubfolder = PlugIns;
 			files = (
-				5055BD3A30A208F300F87346 /* OsaifuWidgets.appex in Embed Foundation Extensions */,
+				509772CE30A20A0800552730 /* OsaifuWidgets.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 		};
@@ -120,7 +120,7 @@
 				000000000000000120000000 /* Sources */,
 				000000000000000130000000 /* Frameworks */,
 				000000000000000140000000 /* Resources */,
-				501C376E30A208E600CAB832 /* Embed Foundation Extensions */,
+				50873D6530A20A0600C29A65 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -446,11 +446,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OsaifuWidgets/OsaifuWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4V4WYXA8NM;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OsaifuWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Osaifu;
 				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.satsurakyno.MyApp.OsaifuWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -464,11 +469,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OsaifuWidgets/OsaifuWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4V4WYXA8NM;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OsaifuWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Osaifu;
 				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.satsurakyno.MyApp.OsaifuWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

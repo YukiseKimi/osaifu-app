@@ -32,7 +32,14 @@ public enum SyncStatus {
         containerID: String = StoreSetup.cloudContainerID,
         timeout: Duration = .seconds(5)
     ) async -> CloudAccount {
-        await withTaskGroup(of: CloudAccount?.self) { group in
+        // CKContainer(identifier:) traps, it does not throw, in a process
+        // that the container is not in the entitlements of. An unsigned build
+        // is such a process, and a catch cannot save it. The token is nil in
+        // exactly those processes, and in every signed-out one, where the
+        // honest answer is the same: no account.
+        guard FileManager.default.ubiquityIdentityToken != nil else { return .noAccount }
+
+        return await withTaskGroup(of: CloudAccount?.self) { group in
             group.addTask {
                 do {
                     return state(for: try await CKContainer(identifier: containerID).accountStatus())

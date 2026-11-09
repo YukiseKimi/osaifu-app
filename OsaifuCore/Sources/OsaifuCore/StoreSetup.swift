@@ -5,8 +5,9 @@ import SwiftData
 /// before a migration runs.
 public enum StoreSetup {
 
-    /// The CloudKit container that holds the private database. Every target
-    /// names this one, so each device reads the same records.
+    /// The CloudKit container that holds the private database. The
+    /// entitlements of each target name it, and SyncStatus asks it for the
+    /// account state.
     public static let cloudContainerID = "iCloud.com.satsurakyno.MyApp"
 
     /// The App Group that the app and its extensions share on one device.
@@ -30,9 +31,13 @@ public enum StoreSetup {
     /// location, and the backup reads that same location back from it.
     public static func makeContainer() throws -> ModelContainer {
         let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
+        // Automatic, rather than naming the container outright: SwiftData
+        // takes the one container in the entitlements, and mirrors nothing
+        // when there are none. Naming it makes a build with no iCloud
+        // entitlement die on launch, which is every unsigned build.
         let ownToTheApp = ModelConfiguration(
             schema: schema,
-            cloudKitDatabase: .private(cloudContainerID)
+            cloudKitDatabase: .automatic
         )
 
         // SwiftData calls fatalError when a group is named that the app is not
@@ -42,7 +47,7 @@ public enum StoreSetup {
             let shared = ModelConfiguration(
                 schema: schema,
                 groupContainer: .identifier(appGroupID),
-                cloudKitDatabase: .private(cloudContainerID)
+                cloudKitDatabase: .automatic
             )
             do {
                 // The group gives the store a new place. This carries the old
