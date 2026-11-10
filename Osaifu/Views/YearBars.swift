@@ -18,7 +18,8 @@ struct YearBars: View {
                 Chart(years) { year in
                     BarMark(
                         x: .value("Year", year.name),
-                        y: .value("Spent", year.total.plotValue)
+                        y: .value("Spent", year.total.plotValue),
+                        width: .fixed(54)
                     )
                     .cornerRadius(4)
                     .foregroundStyle(Color.appAccent.opacity(0.85))

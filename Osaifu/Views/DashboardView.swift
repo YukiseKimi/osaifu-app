@@ -48,30 +48,36 @@ struct DashboardView: View {
                     )
                     .padding(.top, 60)
                 } else {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 320), spacing: 16)], spacing: 16) {
-                        CategoryPie(
-                            slices: ExpenseAnalytics.byCategory(
-                                expenses,
-                                in: pieInterval,
-                                homeCurrencyCode: homeCurrencyCode,
-                                countsForeignSpend: countsForeignSpend,
-                                rates: rateByCurrency
-                            ),
-                            title: pieTitle
-                        )
+                    VStack(spacing: 16) {
+                        LazyVGrid(
+                            columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)],
+                            spacing: 16
+                        ) {
+                            CategoryPie(
+                                slices: ExpenseAnalytics.byCategory(
+                                    expenses,
+                                    in: pieInterval,
+                                    homeCurrencyCode: homeCurrencyCode,
+                                    countsForeignSpend: countsForeignSpend,
+                                    rates: rateByCurrency
+                                ),
+                                title: pieTitle
+                            )
 
-                        MonthBars(
-                            months: ExpenseAnalytics.byMonth(
-                                expenses,
-                                of: .now,
-                                homeCurrencyCode: homeCurrencyCode,
-                                countsForeignSpend: countsForeignSpend,
-                                rates: rateByCurrency
-                            ),
-                            title: "Each month of \(Date.now.formatted(.dateTime.year()))",
-                            chosen: $chosenMonth
-                        )
+                            MonthBars(
+                                months: ExpenseAnalytics.byMonth(
+                                    expenses,
+                                    of: .now,
+                                    homeCurrencyCode: homeCurrencyCode,
+                                    countsForeignSpend: countsForeignSpend,
+                                    rates: rateByCurrency
+                                ),
+                                title: "Each month of \(Date.now.formatted(.dateTime.year()))",
+                                chosen: $chosenMonth
+                            )
+                        }
 
+                        // The years run the width of the page, under the two.
                         YearBars(
                             years: ExpenseAnalytics.byYear(
                                 expenses,
@@ -80,7 +86,6 @@ struct DashboardView: View {
                                 rates: rateByCurrency
                             )
                         )
-                        .gridCellColumns(2)
                     }
                     .padding(16)
                 }
@@ -96,7 +101,7 @@ struct DashboardView: View {
                             Text(period.title).tag(period)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                 }
             }
         }
