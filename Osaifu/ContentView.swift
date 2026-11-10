@@ -32,10 +32,23 @@ struct RootView: View {
     @Query private var preferences: [Preferences]
     @Environment(\.scenePhase) private var scenePhase
     @State private var sync = SyncMonitor()
+    #if !os(macOS)
+    @Environment(\.horizontalSizeClass) private var widthClass
+    #endif
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
 
     private var appearance: AppearanceMode {
         AppearanceMode(rawValue: appearanceRaw) ?? .system
+    }
+
+    /// A wide screen has room for the charts. A phone does not, so it keeps
+    /// the tabs it had. The Mac is always wide.
+    private var isWide: Bool {
+        #if os(macOS)
+        true
+        #else
+        widthClass == .regular
+        #endif
     }
 
     /// The newest settings row wins, so two devices agree. Before the first row
@@ -47,6 +60,11 @@ struct RootView: View {
 
     var body: some View {
         TabView {
+            if isWide {
+                Tab("Dashboard", systemImage: "square.grid.2x2") {
+                    DashboardView()
+                }
+            }
             Tab("Overview", systemImage: "chart.pie.fill") {
                 OverviewView()
             }
@@ -63,6 +81,9 @@ struct RootView: View {
                 SettingsView()
             }
         }
+        // On an iPad and a Mac this becomes a sidebar; on a phone it stays
+        // the tab bar it was.
+        .tabViewStyle(.sidebarAdaptable)
         .tint(.appAccent)
         // System follows the device; Light/Dark force a scheme app-wide.
         .preferredColorScheme(appearance.colorScheme)
