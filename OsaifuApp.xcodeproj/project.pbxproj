@@ -107,14 +107,6 @@
 			);
 			target = 50F56EE430A340C40047CF32 /* OsaifuWatch */;
 		};
-		50B935B430A208C600BCA942 /* Exceptions for "OsaifuWidgets" folder in "OsaifuWidgets" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				OsaifuWidgetsBundle.swift,
-				SpentThisMonthWidget.swift,
-			);
-			target = 502DEEEA30A2082B00C368CF /* OsaifuWidgets */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -136,9 +128,6 @@
 		};
 		506C19F030A208AE00EDACE6 /* OsaifuWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				50B935B430A208C600BCA942 /* Exceptions for "OsaifuWidgets" folder in "OsaifuWidgets" target */,
-			);
 			path = OsaifuWidgets;
 			sourceTree = "<group>";
 		};
@@ -672,6 +661,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -695,6 +686,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

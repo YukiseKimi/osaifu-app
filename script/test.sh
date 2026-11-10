@@ -92,7 +92,8 @@ lane_journey() {
         "${only[@]}" 2>&1)
     finish=$(date +%s)
 
-    if printf '%s' "$out" | grep -q "^\*\* TEST SUCCEEDED \*\*"; then
+    # test-without-building prints TEST EXECUTE SUCCEEDED, not TEST SUCCEEDED.
+    if printf '%s' "$out" | grep -qE "^\*\* TEST (EXECUTE )?SUCCEEDED \*\*"; then
         green "journey   $(printf '%s' "$out" | grep -cE "' passed \(") passed in $((finish - start))s"
     else
         red "journey"
