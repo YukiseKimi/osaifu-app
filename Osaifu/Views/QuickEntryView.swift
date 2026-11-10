@@ -49,6 +49,8 @@ struct QuickEntryView: View {
                 saveButton
             }
             .padding()
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(A11yID.QuickEntry.pad)
             .moodBackground()
             .navigationTitle("New Expense")
             #if os(iOS)
@@ -81,6 +83,7 @@ struct QuickEntryView: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(A11yID.QuickEntry.amount)
         .accessibilityLabel("Amount \(typed.isEmpty ? "0" : typed) \(settings.homeCurrencyCode)")
     }
 
@@ -98,6 +101,7 @@ struct QuickEntryView: View {
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     .tint(chosen == option ? option.color : .secondary)
+                    .accessibilityIdentifier(A11yID.QuickEntry.category(option.rawValue))
                 }
             }
             .padding(.horizontal, 2)
@@ -116,6 +120,7 @@ struct QuickEntryView: View {
                                 .frame(maxWidth: .infinity, minHeight: 52)
                         }
                         .buttonStyle(.bordered)
+                        .accessibilityIdentifier(A11yID.QuickEntry.key(key))
                         .accessibilityLabel(key == "\u{232B}" ? "Delete" : key)
                     }
                 }
@@ -125,6 +130,7 @@ struct QuickEntryView: View {
 
     private var saveButton: some View {
         Button("Save", action: save)
+            .accessibilityIdentifier(A11yID.QuickEntry.save)
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .frame(maxWidth: .infinity)

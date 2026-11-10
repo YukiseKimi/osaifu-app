@@ -11,7 +11,7 @@ struct OsaifuApp: App {
     init() {
         // StoreSetup copies the store before a migration runs, and mirrors it
         // to iCloud through the CloudKit capability in the entitlements.
-        store = Result { try StoreSetup.makeContainer() }
+        store = Result { try HermeticLaunch.container() }
     }
 
     var body: some Scene {

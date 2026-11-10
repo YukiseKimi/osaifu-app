@@ -172,6 +172,32 @@ public enum StoreSetup {
         }
     }
 
+    /// A store of this run's own, in a temporary folder, with no iCloud.
+    ///
+    /// This is the seam a UI test needs: the app opens a real store, with the
+    /// real schema and the real migrations, but not the one a person keeps.
+    /// It survives a relaunch, so a journey can check that what it saved is
+    /// still there, and `resetting` empties it at the start of a run.
+    public static func makeSealedContainer(resetting: Bool) throws -> ModelContainer {
+        let folder = URL.temporaryDirectory.appending(path: "OsaifuSealedStore", directoryHint: .isDirectory)
+        let files = FileManager.default
+        if resetting, files.fileExists(atPath: folder.path) {
+            try? files.removeItem(at: folder)
+        }
+        try files.createDirectory(at: folder, withIntermediateDirectories: true)
+
+        let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
+        return try ModelContainer(
+            for: schema,
+            migrationPlan: OsaifuMigrationPlan.self,
+            configurations: ModelConfiguration(
+                schema: schema,
+                url: folder.appending(path: "sealed.store"),
+                cloudKitDatabase: .none
+            )
+        )
+    }
+
     /// A store that lives in memory, for previews and tests.
     public static func makeInMemoryContainer() throws -> ModelContainer {
         let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
