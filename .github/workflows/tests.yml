@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A Run workflow button on the Actions tab. GitHub only shows it for a
+  # workflow that is on the default branch, so it appears once this lands
+  # on main.
+  workflow_dispatch:
 
 concurrency:
   # A new push to the same branch cancels the run before it.
