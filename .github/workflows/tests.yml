@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  # A new push to the same branch cancels the run before it.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: OsaifuCore tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the newest Xcode on the runner
+        run: |
+          set -euo pipefail
+          newest=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -n "$newest" ]; then sudo xcode-select -s "$newest"; fi
+          xcodebuild -version
+
+      # The package holds the models, the money type, the migrations and the
+      # analytics. Its tests are headless and take well under a second.
+      - name: Test
+        run: swift test --package-path OsaifuCore
+
+  app:
+    name: Build every target
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the newest Xcode on the runner
+        run: |
+          set -euo pipefail
+          newest=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -n "$newest" ]; then sudo xcode-select -s "$newest"; fi
+          xcodebuild -version
+
+      # Building the app scheme builds the widget extension and the watch app
+      # with it, because the app embeds them. A runner signs nothing.
+      - name: Build the iPhone app, the widget and the watch app
+        run: |
+          xcodebuild build \
+            -project OsaifuApp.xcodeproj \
+            -scheme Osaifu \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO

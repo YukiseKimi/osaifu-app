@@ -3,6 +3,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/YukiseKimi/osaifu-app/actions/workflows/tests.yml"><img alt="Tests" src="https://github.com/YukiseKimi/osaifu-app/actions/workflows/tests.yml/badge.svg"></a>
   <img alt="Platforms" src="https://img.shields.io/badge/platforms-iOS%20%7C%20macOS-1B3A5B">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-SwiftUI%20%2B%20SwiftData-orange">
   <img alt="Sync" src="https://img.shields.io/badge/sync-iCloud%20CloudKit-3478F6">
