@@ -45,39 +45,13 @@ struct SpentProvider: TimelineProvider {
 }
 
 extension SpentEntry {
-    /// Reads the store once. On any failure it shows zero rather than nothing,
-    /// so the widget never sits blank on the Home Screen.
+    /// One shared read, so this widget and the watch complication cannot
+    /// disagree about a month.
     @MainActor
     static func read(now: Date = .now) -> SpentEntry {
-        guard let container = try? StoreSetup.makeContainer() else {
-            return SpentEntry(date: now, spent: Money(minorUnits: 0, currencyCode: Currency.defaultCode), progress: nil)
-        }
-        let context = ModelContext(container)
-        let expenses = (try? context.fetch(FetchDescriptor<Expense>())) ?? []
-        let budgets = (try? context.fetch(FetchDescriptor<Budget>())) ?? []
-        let preferences = (try? context.fetch(FetchDescriptor<Preferences>())) ?? []
-        let rates = (try? context.fetch(FetchDescriptor<ExchangeRate>())) ?? []
-
-        let home = preferences.max { $0.updatedAt < $1.updatedAt }?.homeCurrencyCode.nilWhenEmpty
-            ?? Currency.defaultCode
-
-        let progress = BudgetReader.progress(
-            expenses: expenses, budgets: budgets, preferences: preferences,
-            rates: rates, homeCurrencyCode: home, month: now
-        )
-
-        let spent = progress?.spent ?? ExpenseAnalytics.spend(
-            in: expenses, month: now, homeCurrencyCode: home,
-            countsForeignSpend: preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false,
-            rates: [:]
-        ).total
-
-        return SpentEntry(date: now, spent: spent, progress: progress)
+        let snapshot = StoreSnapshot.read(now: now)
+        return SpentEntry(date: now, spent: snapshot.spent, progress: snapshot.progress)
     }
-}
-
-private extension String {
-    var nilWhenEmpty: String? { isEmpty ? nil : self }
 }
 
 struct SpentWidgetView: View {
