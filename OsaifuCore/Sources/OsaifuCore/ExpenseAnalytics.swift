@@ -30,10 +30,28 @@ public struct MonthlyCategoryTotal: Identifiable, Sendable {
 /// total is never the sum of two currencies. `inOtherCurrencies(_:than:)` names
 /// what was left out.
 public enum ExpenseAnalytics {
-    /// Totals per category in one currency, sorted from highest to lowest.
-    public static func categoryTotals(for expenses: [Expense], in currencyCode: String) -> [CategoryTotal] {
-        Dictionary(grouping: expenses.filter { $0.currencyCode == currencyCode }, by: \.category)
-            .map { CategoryTotal(category: $0.key, total: Money.sum($0.value.map(\.money), in: currencyCode)) }
+    /// Totals per category in the home currency, highest first.
+    ///
+    /// One currency rule serves every screen: `homeAmount(of:)` decides what
+    /// an expense is worth here, so the pie on This Month, the History chart
+    /// and the iPad dashboard can never disagree about a month.
+    public static func categoryTotals(
+        for expenses: [Expense],
+        in homeCurrencyCode: String,
+        countsForeignSpend: Bool = false,
+        rates: [String: Decimal] = [:]
+    ) -> [CategoryTotal] {
+        var totals: [ExpenseCategory: Int] = [:]
+        for expense in expenses {
+            guard let money = homeAmount(
+                of: expense, homeCurrencyCode: homeCurrencyCode,
+                countsForeignSpend: countsForeignSpend, rates: rates
+            ) else { continue }
+            totals[expense.category, default: 0] += money.minorUnits
+        }
+
+        return totals
+            .map { CategoryTotal(category: $0.key, total: Money(minorUnits: $0.value, currencyCode: homeCurrencyCode)) }
             // The category breaks a tie, so two equal totals keep one order
             // from one redraw to the next.
             .sorted {
@@ -48,37 +66,58 @@ public enum ExpenseAnalytics {
         expenses.filter { calendar.isDate($0.date, equalTo: date, toGranularity: .month) }
     }
 
-    /// The expenses that another currency keeps out of the totals.
-    public static func inOtherCurrencies(_ expenses: [Expense], than currencyCode: String) -> [Expense] {
-        expenses.filter { $0.currencyCode != currencyCode }
+    /// The expenses that no total can count: another currency, and no rate
+    /// the user has given carries them into the home currency.
+    public static func leftOut(
+        _ expenses: [Expense],
+        homeCurrencyCode: String,
+        countsForeignSpend: Bool = false,
+        rates: [String: Decimal] = [:]
+    ) -> [Expense] {
+        expenses.filter {
+            homeAmount(
+                of: $0, homeCurrencyCode: homeCurrencyCode,
+                countsForeignSpend: countsForeignSpend, rates: rates
+            ) == nil
+        }
     }
 
     /// One summary per month that has spending, sorted oldest to newest.
     public static func monthlySummaries(
         for expenses: [Expense],
-        in currencyCode: String,
+        in homeCurrencyCode: String,
+        countsForeignSpend: Bool = false,
+        rates: [String: Decimal] = [:],
         calendar: Calendar = .current
     ) -> [MonthlySummary] {
-        Dictionary(grouping: expenses.filter { $0.currencyCode == currencyCode }) {
-            startOfMonth($0.date, calendar: calendar)
-        }
-        .map {
-            MonthlySummary(
-                monthStart: $0.key,
-                categoryTotals: categoryTotals(for: $0.value, in: currencyCode),
-                currencyCode: currencyCode
-            )
-        }
-        .sorted { $0.monthStart < $1.monthStart }
+        Dictionary(grouping: expenses) { startOfMonth($0.date, calendar: calendar) }
+            .map { month, expenses in
+                MonthlySummary(
+                    monthStart: month,
+                    categoryTotals: categoryTotals(
+                        for: expenses, in: homeCurrencyCode,
+                        countsForeignSpend: countsForeignSpend, rates: rates
+                    ),
+                    currencyCode: homeCurrencyCode
+                )
+            }
+            // A month whose every expense was left out has nothing to show.
+            .filter { !$0.categoryTotals.isEmpty }
+            .sorted { $0.monthStart < $1.monthStart }
     }
 
     /// Flattened (month, category) data points for a stacked bar chart.
     public static func monthlyCategoryTotals(
         for expenses: [Expense],
-        in currencyCode: String,
+        in homeCurrencyCode: String,
+        countsForeignSpend: Bool = false,
+        rates: [String: Decimal] = [:],
         calendar: Calendar = .current
     ) -> [MonthlyCategoryTotal] {
-        monthlySummaries(for: expenses, in: currencyCode, calendar: calendar).flatMap { summary in
+        monthlySummaries(
+            for: expenses, in: homeCurrencyCode,
+            countsForeignSpend: countsForeignSpend, rates: rates, calendar: calendar
+        ).flatMap { summary in
             summary.categoryTotals.map {
                 MonthlyCategoryTotal(monthStart: summary.monthStart, category: $0.category, total: $0.total)
             }

@@ -67,12 +67,14 @@ struct BudgetLimitView: View {
 
     private func save() {
         guard let limit = typedLimit, limit.minorUnits > 0 else { return }
-        try? Budget.setLimit(limit, in: modelContext)
+        _ = try? Budget.setLimit(limit, in: modelContext)
+        WidgetRefresh.afterChange()
         dismiss()
     }
 
     private func remove() {
         try? Budget.removeLimit(in: modelContext)
+        WidgetRefresh.afterChange()
         dismiss()
     }
 }

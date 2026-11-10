@@ -26,13 +26,15 @@ struct BudgetProgressTests {
         month: Date = day(2026, 11, 15),
         carries: Bool = false,
         countsForeign: Bool = false,
-        rates: [String: Decimal] = [:]
+        rates: [String: Decimal] = [:],
+        home: String = "JPY"
     ) -> BudgetProgress {
         ExpenseAnalytics.progress(
             limit: limit, expenses: expenses, month: month,
+            homeCurrencyCode: home,
             carriesRemainderOver: carries, countsForeignSpend: countsForeign,
             rates: rates, calendar: utc
-        )
+        )!
     }
 
     @Test("A month with no expense has the whole limit left")
@@ -108,5 +110,49 @@ struct BudgetProgressTests {
         let state = progress(expenses, carries: true)
         #expect(state.carriedOver == Money.zero("JPY"))
         #expect(state.limit == limit)
+    }
+
+    // The limit keeps the currency it was set in. These say what happens when
+    // the user later moves to another home currency.
+
+    @Test("A limit in another currency needs a rate, or there is no figure")
+    func staleLimitWithNoRate() {
+        let state = ExpenseAnalytics.progress(
+            limit: limit, expenses: [yen(5_000, day(2026, 11, 2))], month: day(2026, 11, 15),
+            homeCurrencyCode: "USD",
+            carriesRemainderOver: false, countsForeignSpend: false,
+            rates: [:], calendar: utc
+        )
+        #expect(state == nil)
+    }
+
+    @Test("A rate carries the limit into the new home currency")
+    func staleLimitWithARate() {
+        let state = ExpenseAnalytics.progress(
+            limit: limit, expenses: [], month: day(2026, 11, 15),
+            homeCurrencyCode: "USD",
+            carriesRemainderOver: false, countsForeignSpend: false,
+            rates: ["JPY": Decimal(string: "0.0065")!], calendar: utc
+        )
+        // 120,000 yen at 0.0065 is 780 dollars, which is 78,000 cents.
+        #expect(state?.limit.currencyCode == "USD")
+        #expect(state?.limit.minorUnits == 78_000)
+    }
+
+    @Test("Spending is measured in today's home currency, not the limit's")
+    func spendingFollowsTheHomeCurrency() {
+        let dollars = Expense(
+            money: Money(minorUnits: 5_000, currencyCode: "USD"),
+            category: .food,
+            date: day(2026, 11, 2)
+        )
+        let state = ExpenseAnalytics.progress(
+            limit: limit, expenses: [dollars], month: day(2026, 11, 15),
+            homeCurrencyCode: "USD",
+            carriesRemainderOver: false, countsForeignSpend: false,
+            rates: ["JPY": Decimal(string: "0.0065")!], calendar: utc
+        )
+        #expect(state?.spent.minorUnits == 5_000)
+        #expect(state?.spent.currencyCode == "USD")
     }
 }

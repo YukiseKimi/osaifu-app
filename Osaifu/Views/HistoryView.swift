@@ -9,12 +9,30 @@ struct HistoryView: View {
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
     @Environment(\.homeCurrencyCode) private var currencyCode
 
+    @Query private var preferences: [Preferences]
+    @Query private var rates: [ExchangeRate]
+
+    /// The one settings row decides whether another currency counts.
+    private var countsForeignSpend: Bool {
+        preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false
+    }
+
+    private var rateByCurrency: [String: Decimal] {
+        BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
+    }
+
     private var summaries: [MonthlySummary] {
-        ExpenseAnalytics.monthlySummaries(for: allExpenses, in: currencyCode)
+        ExpenseAnalytics.monthlySummaries(
+            for: allExpenses, in: currencyCode,
+            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+        )
     }
 
     private var chartRows: [MonthlyCategoryTotal] {
-        ExpenseAnalytics.monthlyCategoryTotals(for: allExpenses, in: currencyCode)
+        ExpenseAnalytics.monthlyCategoryTotals(
+            for: allExpenses, in: currencyCode,
+            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+        )
     }
 
     /// Categories that actually appear in the data, in a stable order, so the

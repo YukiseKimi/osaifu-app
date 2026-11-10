@@ -41,6 +41,7 @@ struct ExchangeRateRow: View {
     private func save(_ typed: String) {
         guard hasLoaded else { return }
         let rate = Money.decimal(fromTyped: typed) ?? 0
-        try? ExchangeRate.setRate(rate, from: currencyCode, to: homeCurrencyCode, in: modelContext)
+        _ = try? ExchangeRate.setRate(rate, from: currencyCode, to: homeCurrencyCode, in: modelContext)
+        WidgetRefresh.afterChange()
     }
 }

@@ -53,8 +53,9 @@ struct ExpenseAnalyticsTests {
         ]
         let totals = ExpenseAnalytics.categoryTotals(for: expenses, in: "JPY")
         #expect(totals.map(\.total.minorUnits) == [1000])
-        #expect(ExpenseAnalytics.inOtherCurrencies(expenses, than: "JPY").count == 1)
-        #expect(ExpenseAnalytics.inOtherCurrencies(expenses, than: "JPY").first?.currencyCode == "USD")
+        let out = ExpenseAnalytics.leftOut(expenses, homeCurrencyCode: "JPY")
+        #expect(out.count == 1)
+        #expect(out.first?.currencyCode == "USD")
     }
 
     @Test("A month holds only its own expenses")
@@ -108,5 +109,50 @@ struct ExpenseAnalyticsTests {
         let expense = yen(100, .food, day(2026, 6, 1))
         expense.categoryID = "crypto"
         #expect(expense.category == .other)
+    }
+
+    // One currency rule serves every screen. These hold the three families to
+    // the same answer, so This Month, History and the dashboard agree.
+
+    @Test("With a rate given, a total counts the other currency too")
+    func totalsCountAnotherCurrencyWithARate() {
+        let expenses = [
+            yen(1000, .food, day(2026, 6, 1)),
+            Expense(money: Money(minorUnits: 4000, currencyCode: "USD"), category: .travel, date: day(2026, 6, 2))
+        ]
+        let totals = ExpenseAnalytics.categoryTotals(
+            for: expenses, in: "JPY", countsForeignSpend: true, rates: ["USD": 150]
+        )
+        // 4,000 cents is 40 dollars, which is 6,000 yen at 150.
+        #expect(totals.map(\.total.minorUnits) == [6000, 1000])
+        #expect(ExpenseAnalytics.leftOut(
+            expenses, homeCurrencyCode: "JPY", countsForeignSpend: true, rates: ["USD": 150]
+        ).isEmpty)
+    }
+
+    @Test("A month reads the same through every family")
+    func everyFamilyAgrees() {
+        let expenses = [
+            yen(1000, .food, day(2026, 6, 1)),
+            Expense(money: Money(minorUnits: 4000, currencyCode: "USD"), category: .travel, date: day(2026, 6, 2))
+        ]
+        let rates: [String: Decimal] = ["USD": 150]
+
+        let categories = ExpenseAnalytics.categoryTotals(
+            for: expenses, in: "JPY", countsForeignSpend: true, rates: rates
+        ).reduce(0) { $0 + $1.total.minorUnits }
+
+        let buckets = ExpenseAnalytics.byCategory(
+            expenses, homeCurrencyCode: "JPY", countsForeignSpend: true, rates: rates
+        ).reduce(0) { $0 + $1.total.minorUnits }
+
+        let month = ExpenseAnalytics.spend(
+            in: expenses, month: day(2026, 6, 15), homeCurrencyCode: "JPY",
+            countsForeignSpend: true, rates: rates, calendar: utc
+        ).total.minorUnits
+
+        #expect(categories == 7000)
+        #expect(buckets == 7000)
+        #expect(month == 7000)
     }
 }

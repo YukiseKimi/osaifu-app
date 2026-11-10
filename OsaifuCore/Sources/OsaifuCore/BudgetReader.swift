@@ -18,7 +18,25 @@ public enum BudgetReader {
         )
     }
 
-    /// Where the month stands, or nil when no limit is set.
+    /// The limit that no rate can bring into the home currency, or nil when
+    /// there is no such trouble. The Budget screen says so rather than draw a
+    /// bar that means nothing.
+    public static func limitNeedingRate(
+        budgets: [Budget],
+        rates: [ExchangeRate],
+        homeCurrencyCode: String
+    ) -> Money? {
+        guard let budget = activeBudget(budgets) else { return nil }
+        let converted = ExpenseAnalytics.limitInHomeCurrency(
+            budget.limit,
+            homeCurrencyCode: homeCurrencyCode,
+            rates: rateByCurrency(rates, homeCurrencyCode: homeCurrencyCode)
+        )
+        return converted == nil ? budget.limit : nil
+    }
+
+    /// Where the month stands, or nil when no limit is set, or when the limit
+    /// is in a currency this month cannot be measured against.
     public static func progress(
         expenses: [Expense],
         budgets: [Budget],
@@ -33,6 +51,7 @@ public enum BudgetReader {
             limit: budget.limit,
             expenses: expenses,
             month: month,
+            homeCurrencyCode: homeCurrencyCode,
             carriesRemainderOver: settings?.carriesRemainderOver ?? false,
             countsForeignSpend: settings?.countsForeignSpend ?? false,
             rates: rateByCurrency(rates, homeCurrencyCode: homeCurrencyCode)

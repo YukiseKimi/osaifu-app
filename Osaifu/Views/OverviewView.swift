@@ -11,21 +11,42 @@ struct OverviewView: View {
     @Environment(\.homeCurrencyCode) private var currencyCode
     @State private var isAddingExpense = false
 
+    @Query private var preferences: [Preferences]
+    @Query private var rates: [ExchangeRate]
+
+    /// The one settings row decides whether another currency counts.
+    private var countsForeignSpend: Bool {
+        preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false
+    }
+
+    private var rateByCurrency: [String: Decimal] {
+        BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
+    }
+
     private var monthExpenses: [Expense] {
         ExpenseAnalytics.expenses(allExpenses, inMonthOf: .now)
     }
 
     private var categoryTotals: [CategoryTotal] {
-        ExpenseAnalytics.categoryTotals(for: monthExpenses, in: currencyCode)
+        ExpenseAnalytics.categoryTotals(
+            for: monthExpenses, in: currencyCode,
+            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+        )
     }
 
     private var monthTotal: Money {
-        Money.sum(monthExpenses.map(\.money), in: currencyCode)
+        ExpenseAnalytics.spend(
+            in: monthExpenses, month: .now, homeCurrencyCode: currencyCode,
+            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+        ).total
     }
 
-    /// Expenses that another currency keeps out of the total.
+    /// Expenses no total can count: another currency, and no rate for it.
     private var otherCurrencies: [Expense] {
-        ExpenseAnalytics.inOtherCurrencies(monthExpenses, than: currencyCode)
+        ExpenseAnalytics.leftOut(
+            monthExpenses, homeCurrencyCode: currencyCode,
+            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+        )
     }
 
     /// Color used for the glow halo behind the donut (largest category).
