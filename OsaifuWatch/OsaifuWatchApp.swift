@@ -32,18 +32,19 @@ struct OsaifuWatchApp: App {
     }
 }
 
-/// What the watch shows. The expense pad arrives in the next commit; until
-/// then this proves that the watch reads the store the phone writes.
+/// What the watch shows: the pad that takes an expense.
 struct WatchRootView: View {
-    @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
+    @Query private var preferences: [Preferences]
+    @State private var minorUnits = 0
+
+    /// The newest settings row wins, so the watch and the phone agree.
+    private var currencyCode: String {
+        let code = preferences.max { $0.updatedAt < $1.updatedAt }?.homeCurrencyCode ?? ""
+        return code.isEmpty ? Preferences.legacyCurrencyCode() : code
+    }
 
     var body: some View {
-        VStack(spacing: 4) {
-            Text("Osaifu")
-                .font(.headline)
-            Text("\(expenses.count) expenses")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
+        AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
+            .padding(.horizontal, 4)
     }
 }
