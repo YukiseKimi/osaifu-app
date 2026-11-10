@@ -16,9 +16,9 @@ struct AmountView: View {
     private var money: Money { Money(minorUnits: minorUnits, currencyCode: currencyCode) }
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             Text(money.formatted())
-                .font(.system(size: 30, weight: .bold, design: .rounded))
+                .font(.system(size: 26, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
@@ -36,7 +36,7 @@ struct AmountView: View {
                 .accessibilityLabel("Amount")
                 .accessibilityValue(money.formatted())
 
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 stepButton("minus", to: AmountStep.down(from: minorUnits))
                 stepButton("plus", to: AmountStep.up(from: minorUnits))
             }
@@ -54,9 +54,11 @@ struct AmountView: View {
             crown = Double(value)
         } label: {
             Image(systemName: symbol)
-                .frame(maxWidth: .infinity)
+                .font(.footnote)
+                .frame(maxWidth: .infinity, minHeight: 18)
         }
         .buttonStyle(.bordered)
+        .controlSize(.mini)
         .accessibilityLabel(symbol == "plus" ? "More" : "Less")
     }
 }

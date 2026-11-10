@@ -16,9 +16,11 @@ struct CategoryRow: View {
                     chosen = category
                 } label: {
                     Image(systemName: category.systemImage)
-                        .frame(maxWidth: .infinity, minHeight: 26)
+                        .font(.footnote)
+                        .frame(maxWidth: .infinity, minHeight: 18)
                 }
                 .buttonStyle(.bordered)
+                .controlSize(.mini)
                 .tint(chosen == category ? category.color : .secondary)
                 .accessibilityLabel(category.title)
                 .accessibilityAddTraits(chosen == category ? [.isSelected] : [])

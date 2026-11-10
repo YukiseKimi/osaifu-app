@@ -98,27 +98,28 @@ struct WatchRootView: View {
 
     private var pad: some View {
         VStack(spacing: 5) {
-            HStack {
-                Spacer()
+            Spacer(minLength: 0)
+            AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
+
+            HStack(spacing: 4) {
                 // The same three states as the phone: connecting, connected,
                 // not connected. It says whether a saved expense is going
                 // anywhere, which is what the watch cannot promise.
                 SyncBadge(account: sync.account, isConnecting: sync.isConnecting)
-            }
-
-            AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
-
-            if let category {
-                Text(category.title)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                if let category {
+                    Text(category.title)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
             }
 
             CategoryRow(categories: categories, chosen: $picked)
 
             Button("Save", action: save)
                 .buttonStyle(.borderedProminent)
+                .controlSize(.small)
                 .disabled(minorUnits <= 0)
         }
         .padding(.horizontal, 4)
