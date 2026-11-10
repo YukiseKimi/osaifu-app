@@ -6,7 +6,7 @@ import OsaifuModel
 public extension ExpenseCategory {
     /// A vivid, stable color so each category looks the same — and pops — in
     /// every chart, badge, and list.
-    public var color: Color {
+    var color: Color {
         switch self {
         case .food: Color(hex: 0xFF5E5B)
         case .groceries: Color(hex: 0x2ED573)
@@ -23,7 +23,7 @@ public extension ExpenseCategory {
     }
 
     /// A glossy gradient derived from the category color, used for icon badges.
-    public var gradient: LinearGradient {
+    var gradient: LinearGradient {
         LinearGradient(
             colors: [color.mix(with: .white, by: 0.18), color.mix(with: .black, by: 0.12)],
             startPoint: .topLeading,
