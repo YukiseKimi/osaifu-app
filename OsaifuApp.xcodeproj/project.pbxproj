@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5046868330A3414A00C4616E /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5046868230A3414A00C4616E /* OsaifuCore */; };
 		50645D802FD98C8100A8E113 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50645D822FD98C8100A8E113 /* OsaifuCore */; };
 		509772CE30A20A0800552730 /* OsaifuWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		50B356AE30A34166000FD170 /* OsaifuWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 50F56EE530A340C40047CF32 /* OsaifuWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50DA588930A208CA00A2C055 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50DA588830A208CA00A2C055 /* OsaifuCore */; };
 /* End PBXBuildFile section */
 
@@ -20,9 +22,25 @@
 			remoteGlobalIDString = 502DEEEA30A2082B00C368CF;
 			remoteInfo = OsaifuWidgets;
 		};
+		5063EC5C30A3415200292D93 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 50F56EE430A340C40047CF32;
+			remoteInfo = OsaifuWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		5073DD1130A341540091588C /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolder = Product;
+			files = (
+				50B356AE30A34166000FD170 /* OsaifuWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+		};
 		50873D6530A20A0600C29A65 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			dstPath = "";
@@ -37,6 +55,7 @@
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Osaifu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Osaifu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OsaifuWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		50F56EE530A340C40047CF32 /* OsaifuWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OsaifuWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -46,6 +65,13 @@
 				Info.plist,
 			);
 			target = 000000000000000100000000 /* Osaifu */;
+		};
+		5096590830A340F9007B6248 /* Exceptions for "OsaifuWatch" folder in "OsaifuWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 50F56EE430A340C40047CF32 /* OsaifuWatch */;
 		};
 		50B935B430A208C600BCA942 /* Exceptions for "OsaifuWidgets" folder in "OsaifuWidgets" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -66,6 +92,14 @@
 			path = Osaifu;
 			sourceTree = "<group>";
 		};
+		500520AD30A340C6001D75F2 /* OsaifuWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5096590830A340F9007B6248 /* Exceptions for "OsaifuWatch" folder in "OsaifuWatch" target */,
+			);
+			path = OsaifuWatch;
+			sourceTree = "<group>";
+		};
 		506C19F030A208AE00EDACE6 /* OsaifuWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -83,6 +117,12 @@
 				50645D802FD98C8100A8E113 /* OsaifuCore in Frameworks */,
 			);
 		};
+		5042064830A340D700EEB170 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				5046868330A3414A00C4616E /* OsaifuCore in Frameworks */,
+			);
+		};
 		50CA777830A208C800B3F819 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
@@ -98,6 +138,7 @@
 				000000000000000000000010 /* Osaifu */,
 				000000000000000000000020 /* Products */,
 				506C19F030A208AE00EDACE6 /* OsaifuWidgets */,
+				500520AD30A340C6001D75F2 /* OsaifuWatch */,
 			);
 			sourceTree = "<group>";
 		};
@@ -106,6 +147,7 @@
 			children = (
 				000000000000000000000120 /* Osaifu.app */,
 				502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */,
+				50F56EE530A340C40047CF32 /* OsaifuWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,11 +163,13 @@
 				000000000000000130000000 /* Frameworks */,
 				000000000000000140000000 /* Resources */,
 				50873D6530A20A0600C29A65 /* Embed Foundation Extensions */,
+				5073DD1130A341540091588C /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				504521C530A208F100913293 /* PBXTargetDependency */,
+				5063EC5D30A3415200292D93 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				000000000000000000000010 /* Osaifu */,
@@ -157,6 +201,27 @@
 			productName = OsaifuWidgets;
 			productReference = 502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
+		};
+		50F56EE430A340C40047CF32 /* OsaifuWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 50F56EE830A340C40047CF32 /* Build configuration list for PBXNativeTarget "OsaifuWatch" */;
+			buildPhases = (
+				502E8F3030A340D5003F3D43 /* Sources */,
+				5042064830A340D700EEB170 /* Frameworks */,
+				5052071730A340D900DAE179 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				500520AD30A340C6001D75F2 /* OsaifuWatch */,
+			);
+			name = OsaifuWatch;
+			packageProductDependencies = (
+				5046868230A3414A00C4616E /* OsaifuCore */,
+			);
+			productName = OsaifuWatch;
+			productReference = 50F56EE530A340C40047CF32 /* OsaifuWatch.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -192,6 +257,7 @@
 			targets = (
 				000000000000000100000000 /* Osaifu */,
 				502DEEEA30A2082B00C368CF /* OsaifuWidgets */,
+				50F56EE430A340C40047CF32 /* OsaifuWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -202,10 +268,20 @@
 			files = (
 			);
 		};
+		5052071730A340D900DAE179 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		000000000000000120000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		502E8F3030A340D5003F3D43 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
 			);
@@ -222,6 +298,11 @@
 			isa = PBXTargetDependency;
 			target = 502DEEEA30A2082B00C368CF /* OsaifuWidgets */;
 			targetProxy = 504521C430A208F100913293 /* PBXContainerItemProxy */;
+		};
+		5063EC5D30A3415200292D93 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 50F56EE430A340C40047CF32 /* OsaifuWatch */;
+			targetProxy = 5063EC5C30A3415200292D93 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -488,6 +569,64 @@
 			};
 			name = Release;
 		};
+		50F56EE630A340C40047CF32 /* Debug configuration for PBXNativeTarget "OsaifuWatch" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = OsaifuWatch/OsaifuWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4V4WYXA8NM;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OsaifuWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Osaifu;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.satsurakyno.MyApp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Debug;
+		};
+		50F56EE730A340C40047CF32 /* Release configuration for PBXNativeTarget "OsaifuWatch" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = OsaifuWatch/OsaifuWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4V4WYXA8NM;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OsaifuWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Osaifu;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.satsurakyno.MyApp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 27.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -515,6 +654,14 @@
 			);
 			defaultConfigurationName = Release;
 		};
+		50F56EE830A340C40047CF32 /* Build configuration list for PBXNativeTarget "OsaifuWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				50F56EE630A340C40047CF32 /* Debug configuration for PBXNativeTarget "OsaifuWatch" */,
+				50F56EE730A340C40047CF32 /* Release configuration for PBXNativeTarget "OsaifuWatch" */,
+			);
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -525,6 +672,11 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5046868230A3414A00C4616E /* OsaifuCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 50645D812FD98C8100A8E113 /* XCLocalSwiftPackageReference "OsaifuCore" */;
+			productName = OsaifuCore;
+		};
 		50645D822FD98C8100A8E113 /* OsaifuCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OsaifuCore;
