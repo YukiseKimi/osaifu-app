@@ -55,6 +55,16 @@ struct DashboardView: View {
                             ),
                             title: "Each month of \(Date.now.formatted(.dateTime.year()))"
                         )
+
+                        YearBars(
+                            years: ExpenseAnalytics.byYear(
+                                expenses,
+                                homeCurrencyCode: homeCurrencyCode,
+                                countsForeignSpend: countsForeignSpend,
+                                rates: rateByCurrency
+                            )
+                        )
+                        .gridCellColumns(2)
                     }
                     .padding(16)
                 }
