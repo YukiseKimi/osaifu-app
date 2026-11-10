@@ -1,4 +1,6 @@
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
+import OsaifuUI
 import SwiftData
 import SwiftUI
 
@@ -47,6 +49,17 @@ struct WatchRootView: View {
     /// The last amount saved. It drives the haptic and the screen that says
     /// what is left.
     @State private var saved: Money?
+
+    /// This month's figures need this month and a little before it, not five
+    /// years of rows. The window is fixed when the screen is made.
+    init() {
+        let since = ExpenseAnalytics.windowStart()
+        _expenses = Query(
+            filter: #Predicate<Expense> { $0.date >= since },
+            sort: \Expense.date,
+            order: .reverse
+        )
+    }
 
     /// The settings, worked out once, by the same rules the phone uses.
     private var settings: AppSettings {

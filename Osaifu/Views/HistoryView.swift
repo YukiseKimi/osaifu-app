@@ -1,7 +1,8 @@
 import SwiftUI
 import SwiftData
 import Charts
-import OsaifuCore
+import OsaifuModel
+import OsaifuUI
 
 /// Month-by-month spending history: a stacked bar chart across months plus a
 /// per-month, per-category breakdown below it.

@@ -1,5 +1,6 @@
 import SwiftUI
-import OsaifuCore
+import OsaifuModel
+import OsaifuUI
 
 extension Color {
     /// The app's signature accent — a vivid violet used for tint and glows.

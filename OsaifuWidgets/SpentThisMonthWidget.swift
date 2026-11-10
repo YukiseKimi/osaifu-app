@@ -1,4 +1,4 @@
-import OsaifuCore
+import OsaifuModel
 import SwiftData
 import SwiftUI
 import WidgetKit

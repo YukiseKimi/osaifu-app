@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 private let utc: Calendar = {
     var calendar = Calendar(identifier: .gregorian)

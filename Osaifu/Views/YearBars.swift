@@ -1,5 +1,5 @@
 import Charts
-import OsaifuCore
+import OsaifuModel
 import SwiftUI
 
 /// What each year spent. The amount sits on the bar, so the chart needs no

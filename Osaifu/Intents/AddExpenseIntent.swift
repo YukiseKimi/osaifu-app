@@ -1,7 +1,8 @@
 import AppIntents
 import Foundation
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
 
 /// Lets Siri, the Shortcuts app, the Action button and the Control Center add
 /// an expense without opening Osaifu.
@@ -30,7 +31,7 @@ struct AddExpenseIntent: AppIntent {
         }
 
         // The same store the app and the widget read, opened the same way.
-        let context = ModelContext(try StoreSetup.makeContainer())
+        let context = ModelContext(try StoreSetup.sharedContainer())
         let home = (try? Preferences.current(
             in: context,
             fallbackCurrencyCode: Preferences.legacyCurrencyCode()

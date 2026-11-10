@@ -1,4 +1,4 @@
-import OsaifuCore
+import OsaifuModel
 import SwiftUI
 
 /// What the watch shows after a save: the amount it took, and what is left

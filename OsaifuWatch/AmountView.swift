@@ -1,4 +1,4 @@
-import OsaifuCore
+import OsaifuModel
 import SwiftUI
 
 /// The amount, set by the Digital Crown.

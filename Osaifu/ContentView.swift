@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuUI
 
 @main
 struct OsaifuApp: App {

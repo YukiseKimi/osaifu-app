@@ -1,5 +1,5 @@
 import SwiftUI
-import OsaifuCore
+import OsaifuModel
 
 /// Shown in place of the app when the store cannot open, which almost always
 /// means a migration did not finish. The expenses are still on the device, and

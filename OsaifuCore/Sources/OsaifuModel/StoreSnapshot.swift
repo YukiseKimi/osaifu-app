@@ -39,10 +39,13 @@ public extension StoreSnapshot {
     /// Reads the shared store once.
     @MainActor
     static func read(now: Date = .now) -> StoreSnapshot {
-        guard let container = try? StoreSetup.makeContainer() else { return .empty(now: now) }
+        guard let container = try? StoreSetup.sharedContainer() else { return .empty(now: now) }
         let context = ModelContext(container)
+        // A widget shows this month. It has no use for five years of rows.
+        let since = ExpenseAnalytics.windowStart(forMonthOf: now)
+        let thisMonth = FetchDescriptor<Expense>(predicate: #Predicate { $0.date >= since })
         return make(
-            expenses: (try? context.fetch(FetchDescriptor<Expense>())) ?? [],
+            expenses: (try? context.fetch(thisMonth)) ?? [],
             budgets: (try? context.fetch(FetchDescriptor<Budget>())) ?? [],
             preferences: (try? context.fetch(FetchDescriptor<Preferences>())) ?? [],
             rates: (try? context.fetch(FetchDescriptor<ExchangeRate>())) ?? [],

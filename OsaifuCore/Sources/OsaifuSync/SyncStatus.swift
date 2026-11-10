@@ -1,6 +1,7 @@
 import CloudKit
 import Foundation
 import SwiftData
+import OsaifuModel
 
 /// What iCloud says about the account that would carry the expenses.
 public enum CloudAccount: Equatable, Sendable {

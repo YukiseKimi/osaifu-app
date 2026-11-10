@@ -1,7 +1,8 @@
 import SwiftUI
 import SwiftData
 import Charts
-import OsaifuCore
+import OsaifuModel
+import OsaifuUI
 
 /// The current month at a glance: a donut chart of spending by category, the
 /// running total, and a per-category list. New expenses are added from here.
@@ -10,6 +11,17 @@ struct OverviewView: View {
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
     @Environment(\.settings) private var settings
     @State private var isAddingExpense = false
+
+    /// This month's figures need this month and a little before it, not five
+    /// years of rows. The window is fixed when the screen is made.
+    init() {
+        let since = ExpenseAnalytics.windowStart()
+        _allExpenses = Query(
+            filter: #Predicate<Expense> { $0.date >= since },
+            sort: \Expense.date,
+            order: .reverse
+        )
+    }
 
     private var monthExpenses: [Expense] {
         ExpenseAnalytics.expenses(allExpenses, inMonthOf: .now)

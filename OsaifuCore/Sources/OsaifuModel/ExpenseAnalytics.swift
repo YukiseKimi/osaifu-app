@@ -156,6 +156,20 @@ public enum ExpenseAnalytics {
         return Array((used + rest).prefix(limit))
     }
 
+    /// The first instant a screen needs to load for one month's figures.
+    ///
+    /// A screen that shows this month needs two things from further back: the
+    /// whole month before it, because a carried remainder reads that one, and
+    /// the last 30 days, because the pad offers the categories of those. In a
+    /// short February the first of those is less than 30 days, so the window
+    /// is whichever reaches back further.
+    public static func windowStart(forMonthOf date: Date = .now, calendar: Calendar = .current) -> Date {
+        let thisMonth = startOfMonth(date, calendar: calendar)
+        let lastMonth = calendar.date(byAdding: .month, value: -1, to: thisMonth) ?? thisMonth
+        let thirtyDays = calendar.date(byAdding: .day, value: -30, to: date) ?? thisMonth
+        return min(lastMonth, thirtyDays)
+    }
+
     /// The first instant of the calendar month containing `date`.
     public static func startOfMonth(_ date: Date, calendar: Calendar = .current) -> Date {
         calendar.date(from: calendar.dateComponents([.year, .month], from: date)) ?? date

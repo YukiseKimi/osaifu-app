@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 /// What a person types, in their own locale, and what the app must store.
 /// A wrong answer here is money quietly lost, so each case is pinned.

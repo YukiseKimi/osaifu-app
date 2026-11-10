@@ -1,5 +1,6 @@
 import Charts
-import OsaifuCore
+import OsaifuModel
+import OsaifuUI
 import SwiftUI
 
 /// Where the money of the period went. The list beside the pie names each

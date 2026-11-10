@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
+import OsaifuUI
 
 /// App preferences: appearance, the display currency, plus developer-friendly
 /// tools for populating and clearing sample data.

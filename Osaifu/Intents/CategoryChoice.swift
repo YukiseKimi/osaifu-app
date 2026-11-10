@@ -1,5 +1,5 @@
 import AppIntents
-import OsaifuCore
+import OsaifuModel
 
 /// The categories, as Siri and the Shortcuts app offer them.
 ///

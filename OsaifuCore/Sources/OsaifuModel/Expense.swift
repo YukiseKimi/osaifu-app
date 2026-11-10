@@ -26,9 +26,19 @@ public final class Expense {
     public var createdAt: Date = Date.now
     public var updatedAt: Date = Date.now
 
-    /// The amount as the first version of the app stored it. Only the migration
-    /// reads it, and version 3 of the schema drops it. Nothing else may use it.
-    public var amount: Double = 0
+    /// The amount as the first version of the app stored it.
+    ///
+    /// It is still here, and it is internal so that only this package can
+    /// reach it: `OsaifuMigrationPlan` reads it to fill `minorUnits`, and
+    /// nothing else may.
+    ///
+    /// Dropping it is not free. Every `VersionedSchema` here names this one
+    /// `Expense` type, so the v1-to-v2 stage reads the old `Double` from the
+    /// live model. Removing the property means giving each schema version its
+    /// own model type and moving the read into `willMigrate` — worth doing,
+    /// but it is the only bridge from the first version's data, and no test
+    /// here drives a real store through that migration yet.
+    var amount: Double = 0
 
     /// The amount and its currency together.
     public var money: Money {
