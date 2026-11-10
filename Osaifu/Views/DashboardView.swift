@@ -44,6 +44,17 @@ struct DashboardView: View {
                             ),
                             title: "\(range.title), by category"
                         )
+
+                        MonthBars(
+                            months: ExpenseAnalytics.byMonth(
+                                expenses,
+                                of: .now,
+                                homeCurrencyCode: homeCurrencyCode,
+                                countsForeignSpend: countsForeignSpend,
+                                rates: rateByCurrency
+                            ),
+                            title: "Each month of \(Date.now.formatted(.dateTime.year()))"
+                        )
                     }
                     .padding(16)
                 }
