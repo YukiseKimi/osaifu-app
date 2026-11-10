@@ -35,7 +35,10 @@ struct OsaifuWatchApp: App {
 /// What the watch shows: the pad that takes an expense.
 struct WatchRootView: View {
     @Query private var preferences: [Preferences]
+    @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
+
     @State private var minorUnits = 0
+    @State private var picked: ExpenseCategory?
 
     /// The newest settings row wins, so the watch and the phone agree.
     private var currencyCode: String {
@@ -43,8 +46,27 @@ struct WatchRootView: View {
         return code.isEmpty ? Preferences.legacyCurrencyCode() : code
     }
 
+    /// The same four the pad on the phone offers, from the same function.
+    private var categories: [ExpenseCategory] {
+        ExpenseAnalytics.favouriteCategories(for: expenses)
+    }
+
+    /// The first of the four stands until the user picks another.
+    private var category: ExpenseCategory? { picked ?? categories.first }
+
     var body: some View {
-        AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
-            .padding(.horizontal, 4)
+        VStack(spacing: 6) {
+            AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
+
+            if let category {
+                Text(category.title)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+
+            CategoryRow(categories: categories, chosen: $picked)
+        }
+        .padding(.horizontal, 4)
     }
 }
