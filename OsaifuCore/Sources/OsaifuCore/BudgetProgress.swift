@@ -104,3 +104,29 @@ public extension ExpenseAnalytics {
         )
     }
 }
+
+public extension BudgetProgress {
+
+    /// The days of the month that remain, today included. It is never zero,
+    /// so a figure for today can always be worked out.
+    func daysLeft(on day: Date = .now, calendar: Calendar = .current) -> Int {
+        guard let month = calendar.range(of: .day, in: .month, for: day) else { return 1 }
+        let today = calendar.component(.day, from: day)
+        return max(1, month.count - today + 1)
+    }
+
+    /// What this day may still spend: what is left of the month, divided by
+    /// the days that remain.
+    ///
+    /// It is the figure the watch shows after a save, because at the till the
+    /// month is too large a number to act on. A month that is over its limit
+    /// has nothing left today, so the figure is zero and never negative.
+    func leftToday(on day: Date = .now, calendar: Calendar = .current) -> Money {
+        let left = remaining.minorUnits
+        guard left > 0 else { return Money.zero(limit.currencyCode) }
+        return Money(
+            minorUnits: left / daysLeft(on: day, calendar: calendar),
+            currencyCode: limit.currencyCode
+        )
+    }
+}

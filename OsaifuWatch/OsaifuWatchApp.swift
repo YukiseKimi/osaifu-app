@@ -37,13 +37,15 @@ struct WatchRootView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var preferences: [Preferences]
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
+    @Query private var budgets: [Budget]
+    @Query private var rates: [ExchangeRate]
 
     @State private var minorUnits = 0
     @State private var picked: ExpenseCategory?
     @State private var sync = SyncMonitor()
 
-    /// The last amount saved. It drives the haptic, and the next commit puts
-    /// what is left on the screen after a save.
+    /// The last amount saved. It drives the haptic and the screen that says
+    /// what is left.
     @State private var saved: Money?
 
     /// The newest settings row wins, so the watch and the phone agree.
@@ -60,7 +62,41 @@ struct WatchRootView: View {
     /// The first of the four stands until the user picks another.
     private var category: ExpenseCategory? { picked ?? categories.first }
 
+    /// Where the month stands, or nil while the user has set no limit.
+    private var progress: BudgetProgress? {
+        BudgetReader.progress(
+            expenses: expenses, budgets: budgets, preferences: preferences,
+            rates: rates, homeCurrencyCode: currencyCode
+        )
+    }
+
+    /// What the month has spent, for the screen that has no limit to show.
+    private var spentThisMonth: Money {
+        ExpenseAnalytics.spend(
+            in: expenses,
+            month: .now,
+            homeCurrencyCode: currencyCode,
+            countsForeignSpend: preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false,
+            rates: BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
+        ).total
+    }
+
     var body: some View {
+        if let saved {
+            SavedView(
+                money: saved,
+                category: category,
+                progress: progress,
+                spent: spentThisMonth,
+                onDone: { self.saved = nil }
+            )
+            .sensoryFeedback(.success, trigger: saved)
+        } else {
+            pad
+        }
+    }
+
+    private var pad: some View {
         VStack(spacing: 5) {
             HStack {
                 Spacer()
@@ -86,7 +122,6 @@ struct WatchRootView: View {
                 .disabled(minorUnits <= 0)
         }
         .padding(.horizontal, 4)
-        .sensoryFeedback(.success, trigger: saved)
         .task { await sync.refresh(context: modelContext) }
     }
 
