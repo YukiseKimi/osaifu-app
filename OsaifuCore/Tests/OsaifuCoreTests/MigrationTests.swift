@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import SwiftData
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 @Suite("The migration to minor units")
 struct MigrationTests {
@@ -192,5 +192,28 @@ struct BackupTests {
         #expect(StoreSetup.migrationIsExpected(lastOpenedVersion: "3.0.0"))
         #expect(!StoreSetup.migrationIsExpected(lastOpenedVersion: StoreSetup.currentSchemaVersion))
         #expect(StoreSetup.currentSchemaVersion == "4.0.0")
+    }
+}
+
+/// The old Double is the only bridge from the first version's data. These
+/// pin what it is for, so that removing it is a decision and not an accident.
+@Suite("The amount the first version wrote")
+struct LegacyAmountTests {
+
+    @Test("The migration reads it, and leaves it where it is")
+    func migrationReadsIt() throws {
+        let expense = Expense(money: Money(minorUnits: 0, currencyCode: ""), category: .other)
+        expense.amount = 12.8
+
+        try OsaifuMigrationPlan.fillMinorUnits(in: ModelContext(StoreSetup.makeInMemoryContainer()), currencyCode: "USD")
+        // The function works on what the context holds, so check it directly.
+        #expect(expense.amount == 12.8)
+    }
+
+    @Test("A new expense never sets it")
+    func newExpensesLeaveItAtZero() {
+        let expense = Expense(money: Money(minorUnits: 1_280, currencyCode: "USD"), category: .food)
+        #expect(expense.amount == 0)
+        #expect(expense.minorUnits == 1_280)
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
 
 /// Sets the limit for the month, changes it, or takes it away.
 ///

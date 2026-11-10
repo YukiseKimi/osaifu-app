@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import OsaifuModel
+import OsaifuSync
 
 /// Holds what an app can say about sync, and reads it again when the app
 /// comes forward.

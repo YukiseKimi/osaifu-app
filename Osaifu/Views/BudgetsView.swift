@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
 
 /// The month against its limit: what is left, how far the month has gone, and
 /// which categories took it. The categories carry no limit of their own.
@@ -9,6 +9,17 @@ struct BudgetsView: View {
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
     @Query private var budgets: [Budget]
     @State private var isEditingLimit = false
+
+    /// This month's figures need this month and a little before it, not five
+    /// years of rows. The window is fixed when the screen is made.
+    init() {
+        let since = ExpenseAnalytics.windowStart()
+        _allExpenses = Query(
+            filter: #Predicate<Expense> { $0.date >= since },
+            sort: \Expense.date,
+            order: .reverse
+        )
+    }
 
     /// The newest limit the user has not removed.
     private var budget: Budget? { BudgetReader.activeBudget(budgets) }

@@ -1,5 +1,5 @@
 import Charts
-import OsaifuCore
+import OsaifuModel
 import SwiftUI
 
 /// What each month of one year spent. Twelve bars, so the axis does not move

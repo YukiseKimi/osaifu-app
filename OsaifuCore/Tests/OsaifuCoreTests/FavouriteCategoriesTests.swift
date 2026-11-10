@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 private let now = Date(timeIntervalSince1970: 1_800_000_000)
 

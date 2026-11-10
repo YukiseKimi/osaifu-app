@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import SwiftData
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 @Suite("The monthly limit")
 struct BudgetTests {

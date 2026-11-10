@@ -25,6 +25,28 @@ public enum StoreSetup {
         }
     }
 
+    /// The one container this process opens, made the first time it is asked
+    /// for.
+    ///
+    /// Opening a container is not cheap: it checks the schema version, may
+    /// copy the store into the App Group and may take a backup. A widget
+    /// timeline and a Siri intent each used to do all of that on every run.
+    @MainActor
+    private static var opened: Result<ModelContainer, any Error>?
+
+    /// The live store, opened once per process.
+    ///
+    /// Call this from anything that runs more than once: a widget provider,
+    /// an App Intent. An app that opens the store at launch and keeps it can
+    /// call `makeContainer()` directly.
+    @MainActor
+    public static func sharedContainer() throws -> ModelContainer {
+        if let opened { return try opened.get() }
+        let result = Result { try makeContainer() }
+        opened = result
+        return try result.get()
+    }
+
     /// The live store, with iCloud mirroring and the migration plan.
     ///
     /// The configuration carries no URL, so SwiftData picks its own default

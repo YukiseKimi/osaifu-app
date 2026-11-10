@@ -1,5 +1,5 @@
 import SwiftUI
-import OsaifuCore
+import OsaifuModel
 
 extension EnvironmentValues {
     /// The settings, read once from the synced rows by the root view and

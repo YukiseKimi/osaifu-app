@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 /// A fixed calendar, so a test gives the same answer in every time zone.
 private let utc: Calendar = {

@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
+import OsaifuUI
 
 /// The fast way in: an amount on a keypad, a category from four chips, Save.
 /// The date, the note and any other currency live behind More.
@@ -13,6 +15,17 @@ struct QuickEntryView: View {
     @State private var typed = ""
     @State private var category: ExpenseCategory?
     @State private var isShowingForm = false
+
+    /// This month's figures need this month and a little before it, not five
+    /// years of rows. The window is fixed when the screen is made.
+    init() {
+        let since = ExpenseAnalytics.windowStart()
+        _allExpenses = Query(
+            filter: #Predicate<Expense> { $0.date >= since },
+            sort: \Expense.date,
+            order: .reverse
+        )
+    }
 
     /// The four the user picks most, so the common expense is one tap.
     private var chips: [ExpenseCategory] {

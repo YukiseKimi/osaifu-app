@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
 
 /// One typed rate: how many units of the home currency one unit of another
 /// currency is worth. The user types it, and nothing is fetched.

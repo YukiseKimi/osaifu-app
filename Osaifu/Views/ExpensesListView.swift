@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
-import OsaifuCore
+import OsaifuModel
+import OsaifuSync
 
 /// A chronological list of every expense, grouped into month sections with the
 /// newest month first. Tap a row to edit it; swipe to delete.

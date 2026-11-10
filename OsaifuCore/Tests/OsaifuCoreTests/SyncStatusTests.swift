@@ -2,7 +2,8 @@ import Testing
 import CloudKit
 import Foundation
 import SwiftData
-@testable import OsaifuCore
+@testable import OsaifuModel
+@testable import OsaifuSync
 
 @Suite("Sync status")
 struct SyncStatusTests {

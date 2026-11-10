@@ -10,7 +10,7 @@ public enum OsaifuSchemaV1: VersionedSchema {
 
 /// The second shape: an expense keeps whole minor units, its own currency, a
 /// stable identifier and two timestamps. It still holds the old `amount`, so
-/// the migration can read it. Version 3 drops that property.
+/// the migration can read it, and it holds it still: see `Expense.amount`.
 public enum OsaifuSchemaV2: VersionedSchema {
     public static var versionIdentifier: Schema.Version { Schema.Version(2, 0, 0) }
     public static var models: [any PersistentModel.Type] { [Expense.self] }

@@ -1,4 +1,6 @@
 import SwiftUI
+import OsaifuModel
+import OsaifuSync
 
 /// One small symbol that says where the data stands with iCloud. It sits in
 /// the toolbar of This Month and beside the Sync row in Settings, so the user

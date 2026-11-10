@@ -1,4 +1,5 @@
-import OsaifuCore
+import OsaifuModel
+import OsaifuUI
 import SwiftUI
 
 /// The four categories this user picks most, as symbols. One tap picks one.

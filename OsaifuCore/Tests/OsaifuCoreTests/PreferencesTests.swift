@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import SwiftData
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 @Suite("Preferences")
 struct PreferencesTests {

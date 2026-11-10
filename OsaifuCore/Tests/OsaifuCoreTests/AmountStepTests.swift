@@ -1,5 +1,5 @@
 import Testing
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 @Suite("The step the crown takes")
 struct AmountStepTests {

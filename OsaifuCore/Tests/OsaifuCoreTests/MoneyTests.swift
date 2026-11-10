@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import OsaifuCore
+@testable import OsaifuModel
 
 @Suite("Money")
 struct MoneyTests {
