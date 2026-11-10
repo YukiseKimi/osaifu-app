@@ -1,16 +1,20 @@
 import SwiftUI
-import OsaifuCore
 
 /// One small symbol that says where the data stands with iCloud. It sits in
 /// the toolbar of This Month and beside the Sync row in Settings, so the user
 /// can see the state at any time.
-struct SyncBadge: View {
+public struct SyncBadge: View {
     let account: CloudAccount
 
     /// True only while the first read is still out. A read that finished and
     /// said nothing is "not connected": the expenses are going nowhere, and
     /// a badge that says "connecting" for ever tells the user nothing.
     var isConnecting: Bool = false
+
+    public init(account: CloudAccount, isConnecting: Bool = false) {
+        self.account = account
+        self.isConnecting = isConnecting
+    }
 
     private var symbol: String {
         if isConnecting { return "arrow.clockwise.icloud.fill" }
@@ -31,7 +35,7 @@ struct SyncBadge: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         Image(systemName: symbol)
             .font(.footnote)
             .foregroundStyle(tint)
@@ -41,10 +45,14 @@ struct SyncBadge: View {
 }
 
 /// The one line that This Month shows while iCloud cannot carry the expenses.
-struct SyncNotice: View {
+public struct SyncNotice: View {
     let account: CloudAccount
 
-    var body: some View {
+    public init(account: CloudAccount) {
+        self.account = account
+    }
+
+    public var body: some View {
         if !account.syncs {
             HStack(spacing: 8) {
                 SyncBadge(account: account)

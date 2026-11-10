@@ -34,11 +34,17 @@ struct OsaifuWatchApp: App {
 
 /// What the watch shows: the pad that takes an expense.
 struct WatchRootView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query private var preferences: [Preferences]
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
 
     @State private var minorUnits = 0
     @State private var picked: ExpenseCategory?
+    @State private var sync = SyncMonitor()
+
+    /// The last amount saved. It drives the haptic, and the next commit puts
+    /// what is left on the screen after a save.
+    @State private var saved: Money?
 
     /// The newest settings row wins, so the watch and the phone agree.
     private var currencyCode: String {
@@ -55,7 +61,15 @@ struct WatchRootView: View {
     private var category: ExpenseCategory? { picked ?? categories.first }
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 5) {
+            HStack {
+                Spacer()
+                // The same three states as the phone: connecting, connected,
+                // not connected. It says whether a saved expense is going
+                // anywhere, which is what the watch cannot promise.
+                SyncBadge(account: sync.account, isConnecting: sync.isConnecting)
+            }
+
             AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
 
             if let category {
@@ -66,7 +80,27 @@ struct WatchRootView: View {
             }
 
             CategoryRow(categories: categories, chosen: $picked)
+
+            Button("Save", action: save)
+                .buttonStyle(.borderedProminent)
+                .disabled(minorUnits <= 0)
         }
         .padding(.horizontal, 4)
+        .sensoryFeedback(.success, trigger: saved)
+        .task { await sync.refresh(context: modelContext) }
+    }
+
+    /// Writes the expense into the store on the watch.
+    ///
+    /// The write always lands: the store is on this device. CloudKit sends
+    /// the row to the phone when the system decides, and the badge above says
+    /// whether it can.
+    private func save() {
+        let money = Money(minorUnits: minorUnits, currencyCode: currencyCode)
+        guard money.minorUnits > 0, let category else { return }
+        modelContext.insert(Expense(money: money, category: category))
+        try? modelContext.save()
+        saved = money
+        minorUnits = 0
     }
 }
