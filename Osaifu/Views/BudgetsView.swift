@@ -5,11 +5,9 @@ import OsaifuCore
 /// The month against its limit: what is left, how far the month has gone, and
 /// which categories took it. The categories carry no limit of their own.
 struct BudgetsView: View {
-    @Environment(\.homeCurrencyCode) private var currencyCode
+    @Environment(\.settings) private var settings
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
     @Query private var budgets: [Budget]
-    @Query private var preferences: [Preferences]
-    @Query private var rates: [ExchangeRate]
     @State private var isEditingLimit = false
 
     /// The newest limit the user has not removed.
@@ -17,8 +15,7 @@ struct BudgetsView: View {
 
     private var progress: BudgetProgress? {
         BudgetReader.progress(
-            expenses: allExpenses, budgets: budgets, preferences: preferences,
-            rates: rates, homeCurrencyCode: currencyCode
+            expenses: allExpenses, budgets: budgets, settings: settings
         )
     }
 
@@ -28,18 +25,15 @@ struct BudgetsView: View {
 
     private var categoryTotals: [CategoryTotal] {
         ExpenseAnalytics.categoryTotals(
-            for: monthExpenses, in: currencyCode,
-            countsForeignSpend: preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false,
-            rates: BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
+            for: monthExpenses, in: settings.homeCurrencyCode,
+            countsForeignSpend: settings.countsForeignSpend, rates: settings.rates
         )
     }
 
     /// A limit set while another currency was home, which no rate can bring
     /// across. The screen says so rather than draw a bar that means nothing.
     private var limitNeedingRate: Money? {
-        BudgetReader.limitNeedingRate(
-            budgets: budgets, rates: rates, homeCurrencyCode: currencyCode
-        )
+        BudgetReader.limitNeedingRate(budgets: budgets, settings: settings)
     }
 
     var body: some View {
@@ -107,7 +101,7 @@ struct BudgetsView: View {
         ContentUnavailableView {
             Label("Limit in Another Currency", systemImage: "exclamationmark.triangle")
         } description: {
-            Text("Your limit is \(limit.formatted()), and your home currency is now \(currencyCode). Give a rate for \(limit.currencyCode) in Settings, or set a new limit.")
+            Text("Your limit is \(limit.formatted()), and your home currency is now \(settings.homeCurrencyCode). Give a rate for \(limit.currencyCode) in Settings, or set a new limit.")
         } actions: {
             Button("Set a New Limit") { isEditingLimit = true }
                 .buttonStyle(.borderedProminent)

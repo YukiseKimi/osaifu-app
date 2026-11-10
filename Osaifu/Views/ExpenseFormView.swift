@@ -10,7 +10,7 @@ import OsaifuCore
 struct ExpenseFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.homeCurrencyCode) private var currencyCode
+    @Environment(\.settings) private var settings
 
     /// The expense being edited, or `nil` when adding a new one.
     var expense: Expense?
@@ -31,7 +31,7 @@ struct ExpenseFormView: View {
     /// An expense keeps the currency it was entered in. A new one takes the
     /// home currency.
     private var activeCurrency: String {
-        editingCurrency.isEmpty ? currencyCode : editingCurrency
+        editingCurrency.isEmpty ? settings.homeCurrencyCode : editingCurrency
     }
 
     private var typedMoney: Money? {
@@ -107,6 +107,7 @@ struct ExpenseFormView: View {
         } else {
             modelContext.insert(Expense(money: money, category: category, note: note, date: date))
         }
+        try? modelContext.save()
         WidgetRefresh.afterChange()
         dismiss()
     }

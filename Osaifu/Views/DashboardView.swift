@@ -5,26 +5,14 @@ import SwiftUI
 /// The dashboard: the charts that a wide screen has room for. The phone
 /// never opens it.
 struct DashboardView: View {
-    @Environment(\.homeCurrencyCode) private var homeCurrencyCode
+    @Environment(\.settings) private var settings
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
-    @Query private var preferences: [Preferences]
-    @Query private var rates: [ExchangeRate]
 
     @State private var range: SpendRange = .month
 
     /// The month the user tapped on the chart. It overrules the range for
     /// the pie, and nothing else.
     @State private var chosenMonth: Date?
-
-    private var settings: Preferences? {
-        preferences.max { $0.updatedAt < $1.updatedAt }
-    }
-
-    private var countsForeignSpend: Bool { settings?.countsForeignSpend ?? false }
-
-    private var rateByCurrency: [String: Decimal] {
-        BudgetReader.rateByCurrency(rates, homeCurrencyCode: homeCurrencyCode)
-    }
 
     /// The period the pie draws: the month the user tapped, else the range.
     private var pieInterval: DateInterval? {
@@ -57,9 +45,9 @@ struct DashboardView: View {
                                 slices: ExpenseAnalytics.byCategory(
                                     expenses,
                                     in: pieInterval,
-                                    homeCurrencyCode: homeCurrencyCode,
-                                    countsForeignSpend: countsForeignSpend,
-                                    rates: rateByCurrency
+                                    homeCurrencyCode: settings.homeCurrencyCode,
+                                    countsForeignSpend: settings.countsForeignSpend,
+                                    rates: settings.rates
                                 ),
                                 title: pieTitle
                             )
@@ -68,9 +56,9 @@ struct DashboardView: View {
                                 months: ExpenseAnalytics.byMonth(
                                     expenses,
                                     of: .now,
-                                    homeCurrencyCode: homeCurrencyCode,
-                                    countsForeignSpend: countsForeignSpend,
-                                    rates: rateByCurrency
+                                    homeCurrencyCode: settings.homeCurrencyCode,
+                                    countsForeignSpend: settings.countsForeignSpend,
+                                    rates: settings.rates
                                 ),
                                 title: "Each month of \(Date.now.formatted(.dateTime.year()))",
                                 chosen: $chosenMonth
@@ -81,9 +69,9 @@ struct DashboardView: View {
                         YearBars(
                             years: ExpenseAnalytics.byYear(
                                 expenses,
-                                homeCurrencyCode: homeCurrencyCode,
-                                countsForeignSpend: countsForeignSpend,
-                                rates: rateByCurrency
+                                homeCurrencyCode: settings.homeCurrencyCode,
+                                countsForeignSpend: settings.countsForeignSpend,
+                                rates: settings.rates
                             )
                         )
                     }

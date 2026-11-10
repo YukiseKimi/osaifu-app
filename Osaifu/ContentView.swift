@@ -30,6 +30,7 @@ struct OsaifuApp: App {
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var preferences: [Preferences]
+    @Query private var rates: [ExchangeRate]
     @Environment(\.scenePhase) private var scenePhase
     @State private var sync = SyncMonitor()
     #if !os(macOS)
@@ -51,11 +52,10 @@ struct RootView: View {
         #endif
     }
 
-    /// The newest settings row wins, so two devices agree. Before the first row
-    /// exists, the currency the first version of the app displayed wins.
-    private var homeCurrencyCode: String {
-        let code = preferences.max { $0.updatedAt < $1.updatedAt }?.homeCurrencyCode ?? ""
-        return code.isEmpty ? Preferences.legacyCurrencyCode() : code
+    /// The one place the settings are worked out. Every screen below reads
+    /// them from the environment.
+    private var settings: AppSettings {
+        AppSettings.from(preferences: preferences, rates: rates)
     }
 
     var body: some View {
@@ -87,7 +87,7 @@ struct RootView: View {
         .tint(.appAccent)
         // System follows the device; Light/Dark force a scheme app-wide.
         .preferredColorScheme(appearance.colorScheme)
-        .environment(\.homeCurrencyCode, homeCurrencyCode)
+        .environment(\.settings, settings)
         .environment(sync)
         .task {
             // Makes the one settings row, and drops any duplicate that iCloud

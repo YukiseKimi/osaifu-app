@@ -7,7 +7,7 @@ import OsaifuCore
 struct QuickEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.homeCurrencyCode) private var currencyCode
+    @Environment(\.settings) private var settings
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
 
     @State private var typed = ""
@@ -21,7 +21,7 @@ struct QuickEntryView: View {
 
     private var chosen: ExpenseCategory? { category ?? chips.first }
 
-    private var money: Money? { Money(typed: typed, currencyCode: currencyCode) }
+    private var money: Money? { Money(typed: typed, currencyCode: settings.homeCurrencyCode) }
 
     private var isValid: Bool { (money?.minorUnits ?? 0) > 0 }
 
@@ -62,13 +62,13 @@ struct QuickEntryView: View {
                 .monospacedDigit()
                 .contentTransition(.numericText())
                 .animation(.snappy, value: typed)
-            Text(currencyCode)
+            Text(settings.homeCurrencyCode)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Amount \(typed.isEmpty ? "0" : typed) \(currencyCode)")
+        .accessibilityLabel("Amount \(typed.isEmpty ? "0" : typed) \(settings.homeCurrencyCode)")
     }
 
     private var chipRow: some View {
@@ -133,6 +133,9 @@ struct QuickEntryView: View {
     private func save() {
         guard let money, money.minorUnits > 0, let chosen else { return }
         modelContext.insert(Expense(money: money, category: chosen))
+        // SwiftData writes on its own schedule. An expense the user has
+        // just added must not wait for it: the app can be killed first.
+        try? modelContext.save()
         WidgetRefresh.afterChange()
         dismiss()
     }
