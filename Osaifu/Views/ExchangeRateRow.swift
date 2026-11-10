@@ -12,12 +12,20 @@ struct ExchangeRateRow: View {
     @State private var text = ""
     @State private var hasLoaded = false
 
+    /// What is in the store, so a field the user opened and left alone
+    /// writes nothing.
+    @State private var saved = ""
+
+    @FocusState private var isFocused: Bool
+
     var body: some View {
         LabeledContent("1 \(currencyCode)") {
             HStack(spacing: 6) {
                 TextField("rate", text: $text)
                     .multilineTextAlignment(.trailing)
                     .monospacedDigit()
+                    .focused($isFocused)
+                    .onSubmit(commit)
                 #if os(iOS)
                     .keyboardType(.decimalPad)
                 #endif
@@ -26,7 +34,13 @@ struct ExchangeRateRow: View {
             }
         }
         .onAppear(perform: loadOnce)
-        .onChange(of: text) { _, typed in save(typed) }
+        // A rate is written when the user finishes with the field, not on
+        // each key: every write is a row in the store and a push to iCloud,
+        // and "155" is three of them.
+        .onChange(of: isFocused) { _, focused in
+            if !focused { commit() }
+        }
+        .onDisappear(perform: commit)
     }
 
     private func loadOnce() {
@@ -34,13 +48,15 @@ struct ExchangeRateRow: View {
         hasLoaded = true
         guard let rate = try? ExchangeRate.rate(from: currencyCode, to: homeCurrencyCode, in: modelContext) else { return }
         text = rate.formatted(.number.grouping(.never))
+        saved = text
     }
 
     /// An empty field, or text that is not a number, means no rate, and the
     /// expenses in that currency stay out of the totals.
-    private func save(_ typed: String) {
-        guard hasLoaded else { return }
-        let rate = Money.decimal(fromTyped: typed) ?? 0
+    private func commit() {
+        guard hasLoaded, text != saved else { return }
+        saved = text
+        let rate = Money.decimal(fromTyped: text) ?? 0
         _ = try? ExchangeRate.setRate(rate, from: currencyCode, to: homeCurrencyCode, in: modelContext)
         WidgetRefresh.afterChange()
     }

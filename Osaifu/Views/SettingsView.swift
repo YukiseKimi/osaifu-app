@@ -95,12 +95,16 @@ struct SettingsView: View {
                     LabeledContent("Example", value: Money(minorUnits: 123456, currencyCode: currencyCode).formatted())
                 }
                 Section {
+                    // Randomized data is for trying the charts out while the
+                    // app is built. It has no place in a build a person uses.
+                    #if DEBUG
                     Button {
                         SampleData.insert(into: modelContext, currencyCode: currencyCode)
                         WidgetRefresh.afterChange()
                     } label: {
                         Label("Add Sample Data", systemImage: "wand.and.stars")
                     }
+                    #endif
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
                     } label: {
@@ -110,7 +114,11 @@ struct SettingsView: View {
                 } header: {
                     Text("Data")
                 } footer: {
+                    #if DEBUG
                     Text("Sample data adds randomized expenses across the last several months for trying out the charts.")
+                    #else
+                    Text("Deleting cannot be undone, and it reaches your other devices.")
+                    #endif
                 }
             }
             .moodBackground()

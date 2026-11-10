@@ -27,7 +27,7 @@ struct LeftEntry: TimelineEntry, Sendable {
 
 struct LeftProvider: TimelineProvider {
     func placeholder(in context: Context) -> LeftEntry {
-        LeftEntry(date: .now, spent: Money.zero(Currency.defaultCode), progress: nil)
+        LeftEntry(date: .now, spent: StoreSnapshot.empty().spent, progress: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (LeftEntry) -> Void) {
@@ -45,35 +45,11 @@ struct LeftProvider: TimelineProvider {
 }
 
 extension LeftEntry {
-    /// Reads the store once. On any failure it shows zero rather than
-    /// nothing, so the face never carries a blank complication.
+    /// The same read the Home Screen widget does.
     @MainActor
     static func read(now: Date = .now) -> LeftEntry {
-        guard let container = try? StoreSetup.makeContainer() else {
-            return LeftEntry(date: now, spent: Money.zero(Currency.defaultCode), progress: nil)
-        }
-        let context = ModelContext(container)
-        let expenses = (try? context.fetch(FetchDescriptor<Expense>())) ?? []
-        let budgets = (try? context.fetch(FetchDescriptor<Budget>())) ?? []
-        let preferences = (try? context.fetch(FetchDescriptor<Preferences>())) ?? []
-        let rates = (try? context.fetch(FetchDescriptor<ExchangeRate>())) ?? []
-
-        let settings = preferences.max { $0.updatedAt < $1.updatedAt }
-        let home = settings.map(\.homeCurrencyCode).flatMap { $0.isEmpty ? nil : $0 }
-            ?? Currency.defaultCode
-
-        let progress = BudgetReader.progress(
-            expenses: expenses, budgets: budgets, preferences: preferences,
-            rates: rates, homeCurrencyCode: home, month: now
-        )
-
-        let spent = progress?.spent ?? ExpenseAnalytics.spend(
-            in: expenses, month: now, homeCurrencyCode: home,
-            countsForeignSpend: settings?.countsForeignSpend ?? false,
-            rates: BudgetReader.rateByCurrency(rates, homeCurrencyCode: home)
-        ).total
-
-        return LeftEntry(date: now, spent: spent, progress: progress)
+        let snapshot = StoreSnapshot.read(now: now)
+        return LeftEntry(date: now, spent: snapshot.spent, progress: snapshot.progress)
     }
 }
 
