@@ -7,7 +7,7 @@ import OsaifuCore
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(SyncMonitor.self) private var sync
-    @Environment(\.homeCurrencyCode) private var currencyCode
+    @Environment(\.settings) private var settings
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
     @Query private var expenses: [Expense]
     @Query private var rates: [ExchangeRate]
@@ -16,6 +16,9 @@ struct SettingsView: View {
 
     /// The currency choices, always including the current selection so the
     /// picker can highlight it even if it isn't in the curated list.
+    /// The currency every row on this screen is about.
+    private var currencyCode: String { settings.homeCurrencyCode }
+
     private var currencies: [Currency] {
         if Currency.common.contains(where: { $0.code == currencyCode }) {
             return Currency.common
@@ -181,6 +184,7 @@ struct SettingsView: View {
         for expense in expenses {
             modelContext.delete(expense)
         }
+        try? modelContext.save()
         WidgetRefresh.afterChange()
     }
 }

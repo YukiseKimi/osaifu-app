@@ -59,21 +59,34 @@ public extension StoreSnapshot {
         rates: [ExchangeRate],
         now: Date = .now
     ) -> StoreSnapshot {
-        let settings = preferences.max { $0.updatedAt < $1.updatedAt }
-        let home = settings.map(\.homeCurrencyCode).flatMap { $0.isEmpty ? nil : $0 }
-            ?? Currency.defaultCode
+        make(
+            expenses: expenses,
+            budgets: budgets,
+            settings: AppSettings.from(preferences: preferences, rates: rates),
+            now: now
+        )
+    }
 
+    /// The same, when the settings are already in hand.
+    static func make(
+        expenses: [Expense],
+        budgets: [Budget],
+        settings: AppSettings,
+        now: Date = .now
+    ) -> StoreSnapshot {
         let progress = BudgetReader.progress(
-            expenses: expenses, budgets: budgets, preferences: preferences,
-            rates: rates, homeCurrencyCode: home, month: now
+            expenses: expenses, budgets: budgets, settings: settings, month: now
         )
 
         let spent = progress?.spent ?? ExpenseAnalytics.spend(
-            in: expenses, month: now, homeCurrencyCode: home,
-            countsForeignSpend: settings?.countsForeignSpend ?? false,
-            rates: BudgetReader.rateByCurrency(rates, homeCurrencyCode: home)
+            in: expenses, month: now,
+            homeCurrencyCode: settings.homeCurrencyCode,
+            countsForeignSpend: settings.countsForeignSpend,
+            rates: settings.rates
         ).total
 
-        return StoreSnapshot(homeCurrencyCode: home, spent: spent, progress: progress)
+        return StoreSnapshot(
+            homeCurrencyCode: settings.homeCurrencyCode, spent: spent, progress: progress
+        )
     }
 }

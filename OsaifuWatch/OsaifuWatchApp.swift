@@ -48,10 +48,9 @@ struct WatchRootView: View {
     /// what is left.
     @State private var saved: Money?
 
-    /// The newest settings row wins, so the watch and the phone agree.
-    private var currencyCode: String {
-        let code = preferences.max { $0.updatedAt < $1.updatedAt }?.homeCurrencyCode ?? ""
-        return code.isEmpty ? Preferences.legacyCurrencyCode() : code
+    /// The settings, worked out once, by the same rules the phone uses.
+    private var settings: AppSettings {
+        AppSettings.from(preferences: preferences, rates: rates)
     }
 
     /// The same four the pad on the phone offers, from the same function.
@@ -64,21 +63,14 @@ struct WatchRootView: View {
 
     /// Where the month stands, or nil while the user has set no limit.
     private var progress: BudgetProgress? {
-        BudgetReader.progress(
-            expenses: expenses, budgets: budgets, preferences: preferences,
-            rates: rates, homeCurrencyCode: currencyCode
-        )
+        BudgetReader.progress(expenses: expenses, budgets: budgets, settings: settings)
     }
 
     /// What the month has spent, for the screen that has no limit to show.
     private var spentThisMonth: Money {
-        ExpenseAnalytics.spend(
-            in: expenses,
-            month: .now,
-            homeCurrencyCode: currencyCode,
-            countsForeignSpend: preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false,
-            rates: BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
-        ).total
+        StoreSnapshot.make(
+            expenses: expenses, budgets: budgets, settings: settings
+        ).spent
     }
 
     var body: some View {
@@ -99,7 +91,7 @@ struct WatchRootView: View {
     private var pad: some View {
         VStack(spacing: 5) {
             Spacer(minLength: 0)
-            AmountView(currencyCode: currencyCode, minorUnits: $minorUnits)
+            AmountView(currencyCode: settings.homeCurrencyCode, minorUnits: $minorUnits)
 
             HStack(spacing: 4) {
                 // The same three states as the phone: connecting, connected,
@@ -132,7 +124,7 @@ struct WatchRootView: View {
     /// the row to the phone when the system decides, and the badge above says
     /// whether it can.
     private func save() {
-        let money = Money(minorUnits: minorUnits, currencyCode: currencyCode)
+        let money = Money(minorUnits: minorUnits, currencyCode: settings.homeCurrencyCode)
         guard money.minorUnits > 0, let category else { return }
         modelContext.insert(Expense(money: money, category: category))
         try? modelContext.save()

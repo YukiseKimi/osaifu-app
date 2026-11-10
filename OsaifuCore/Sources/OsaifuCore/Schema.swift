@@ -65,7 +65,7 @@ public enum OsaifuMigrationPlan: SchemaMigrationPlan {
     /// The first version formatted every amount with one display currency, kept
     /// in UserDefaults, so that is the currency each old amount was entered in.
     static func legacyDisplayCurrencyCode() -> String {
-        UserDefaults.standard.string(forKey: "currencyCode") ?? Currency.defaultCode
+        Preferences.legacyCurrencyCode()
     }
 
     /// Fills `minorUnits` and `currencyCode` for every expense that has none.

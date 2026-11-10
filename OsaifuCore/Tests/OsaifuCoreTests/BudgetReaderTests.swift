@@ -58,15 +58,15 @@ struct BudgetReaderTests {
             rate(0, from: "EUR", to: "JPY", isSet: false),
             rate(1.1, from: "USD", to: "EUR")
         ]
-        let found = BudgetReader.rateByCurrency(rates, homeCurrencyCode: "JPY")
+        let found = AppSettings.ratesByCurrency(rates, homeCurrencyCode: "JPY")
         #expect(found == ["USD": 150])
     }
 
     @Test("No limit set means no progress to draw")
     func noProgressWithoutALimit() {
         let progress = BudgetReader.progress(
-            expenses: [], budgets: [], preferences: [], rates: [],
-            homeCurrencyCode: "JPY"
+            expenses: [], budgets: [],
+            settings: AppSettings(homeCurrencyCode: "JPY")
         )
         #expect(progress == nil)
     }
@@ -89,9 +89,10 @@ struct BudgetReaderTests {
         let progress = BudgetReader.progress(
             expenses: [dollars],
             budgets: [budget(100_000, updated: day(2026, 1, 1))],
-            preferences: [older, newer],
-            rates: [rate(150, from: "USD", to: "JPY")],
-            homeCurrencyCode: "JPY"
+            settings: AppSettings.from(
+                preferences: [older, newer],
+                rates: [rate(150, from: "USD", to: "JPY")]
+            )
         )
         // The newer row counts other currencies, so the ten dollars land.
         #expect(progress?.spent.minorUnits == 1_500)
@@ -101,12 +102,15 @@ struct BudgetReaderTests {
     @Test("A limit in another currency needs a rate")
     func staleLimitNeedsARate() {
         let rows = [budget(100_000, currency: "JPY", updated: day(2026, 1, 1))]
-        #expect(BudgetReader.limitNeedingRate(budgets: rows, rates: [], homeCurrencyCode: "USD") != nil)
+        let inDollars = AppSettings(homeCurrencyCode: "USD")
+        let withARate = AppSettings(
+            homeCurrencyCode: "USD",
+            rates: ["JPY": Decimal(string: "0.0065")!]
+        )
+        #expect(BudgetReader.limitNeedingRate(budgets: rows, settings: inDollars) != nil)
+        #expect(BudgetReader.limitNeedingRate(budgets: rows, settings: withARate) == nil)
         #expect(BudgetReader.limitNeedingRate(
-            budgets: rows,
-            rates: [rate(Decimal(string: "0.0065")!, from: "JPY", to: "USD")],
-            homeCurrencyCode: "USD"
+            budgets: rows, settings: AppSettings(homeCurrencyCode: "JPY")
         ) == nil)
-        #expect(BudgetReader.limitNeedingRate(budgets: rows, rates: [], homeCurrencyCode: "JPY") == nil)
     }
 }

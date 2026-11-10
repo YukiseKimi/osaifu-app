@@ -8,7 +8,7 @@ import OsaifuCore
 struct BudgetLimitView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.homeCurrencyCode) private var currencyCode
+    @Environment(\.settings) private var settings
 
     /// The limit as it stands, or nil when there is none yet.
     var budget: Budget?
@@ -17,7 +17,7 @@ struct BudgetLimitView: View {
     @State private var hasLoaded = false
 
     private var typedLimit: Money? {
-        Money(typed: amountText, currencyCode: currencyCode)
+        Money(typed: amountText, currencyCode: settings.homeCurrencyCode)
     }
 
     private var isValid: Bool { (typedLimit?.minorUnits ?? 0) > 0 }
@@ -27,7 +27,7 @@ struct BudgetLimitView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Limit (\(currencyCode))") {
+                Section("Limit (\(settings.homeCurrencyCode))") {
                     TextField("Amount", text: $amountText)
                     #if os(iOS)
                         .keyboardType(.decimalPad)

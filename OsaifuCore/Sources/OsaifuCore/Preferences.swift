@@ -71,9 +71,24 @@ public extension Preferences {
         return newest
     }
 
-    /// The currency the first version of the app displayed, so an existing user
-    /// keeps the currency they chose.
+    /// The currency the first version of the app displayed, so an existing
+    /// user keeps the currency they chose.
+    ///
+    /// The old app wrote it into its own defaults, which a widget and the
+    /// watch cannot read. The App Group can be read by all of them, so the
+    /// answer is looked for there first and mirrored there when it is found
+    /// in the app's own defaults. Before that mirroring has happened once,
+    /// an extension falls through to the device's currency, as it always did.
     static func legacyCurrencyCode() -> String {
-        UserDefaults.standard.string(forKey: "currencyCode") ?? Currency.defaultCode
+        let shared = UserDefaults(suiteName: StoreSetup.appGroupID)
+        if let code = shared?.string(forKey: legacyCurrencyKey) { return code }
+        if let code = UserDefaults.standard.string(forKey: legacyCurrencyKey) {
+            shared?.set(code, forKey: legacyCurrencyKey)
+            return code
+        }
+        return Currency.defaultCode
     }
+
+    /// The key the first version of the app wrote the display currency under.
+    static var legacyCurrencyKey: String { "currencyCode" }
 }

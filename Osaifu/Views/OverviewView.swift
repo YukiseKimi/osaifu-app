@@ -8,20 +8,8 @@ import OsaifuCore
 struct OverviewView: View {
     @Environment(SyncMonitor.self) private var sync
     @Query(sort: \Expense.date, order: .reverse) private var allExpenses: [Expense]
-    @Environment(\.homeCurrencyCode) private var currencyCode
+    @Environment(\.settings) private var settings
     @State private var isAddingExpense = false
-
-    @Query private var preferences: [Preferences]
-    @Query private var rates: [ExchangeRate]
-
-    /// The one settings row decides whether another currency counts.
-    private var countsForeignSpend: Bool {
-        preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false
-    }
-
-    private var rateByCurrency: [String: Decimal] {
-        BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
-    }
 
     private var monthExpenses: [Expense] {
         ExpenseAnalytics.expenses(allExpenses, inMonthOf: .now)
@@ -29,23 +17,23 @@ struct OverviewView: View {
 
     private var categoryTotals: [CategoryTotal] {
         ExpenseAnalytics.categoryTotals(
-            for: monthExpenses, in: currencyCode,
-            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+            for: monthExpenses, in: settings.homeCurrencyCode,
+            countsForeignSpend: settings.countsForeignSpend, rates: settings.rates
         )
     }
 
     private var monthTotal: Money {
         ExpenseAnalytics.spend(
-            in: monthExpenses, month: .now, homeCurrencyCode: currencyCode,
-            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+            in: monthExpenses, month: .now, homeCurrencyCode: settings.homeCurrencyCode,
+            countsForeignSpend: settings.countsForeignSpend, rates: settings.rates
         ).total
     }
 
     /// Expenses no total can count: another currency, and no rate for it.
     private var otherCurrencies: [Expense] {
         ExpenseAnalytics.leftOut(
-            monthExpenses, homeCurrencyCode: currencyCode,
-            countsForeignSpend: countsForeignSpend, rates: rateByCurrency
+            monthExpenses, homeCurrencyCode: settings.homeCurrencyCode,
+            countsForeignSpend: settings.countsForeignSpend, rates: settings.rates
         )
     }
 
