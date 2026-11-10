@@ -133,6 +133,7 @@ struct QuickEntryView: View {
     private func save() {
         guard let money, money.minorUnits > 0, let chosen else { return }
         modelContext.insert(Expense(money: money, category: chosen))
+        WidgetRefresh.afterChange()
         dismiss()
     }
 }

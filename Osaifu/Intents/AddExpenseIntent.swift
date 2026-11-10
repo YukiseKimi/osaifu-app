@@ -6,8 +6,8 @@ import OsaifuCore
 /// Lets Siri, the Shortcuts app, the Action button and the Control Center add
 /// an expense without opening Osaifu.
 ///
-/// It asks for an amount and a category, which your answer on 5.3 chose: the
-/// shortest sentence that still files the expense where it belongs.
+/// It asks for an amount and a category: the shortest sentence that still
+/// files the expense where it belongs.
 struct AddExpenseIntent: AppIntent {
     static let title: LocalizedStringResource = "Add an Expense"
     static let description = IntentDescription("Adds an expense to Osaifu, in your home currency.")
@@ -39,6 +39,7 @@ struct AddExpenseIntent: AppIntent {
         let money = Money(decimal: Decimal(amount), currencyCode: home)
         context.insert(Expense(money: money, category: category.category))
         try context.save()
+        WidgetRefresh.afterChange()
 
         return .result(dialog: "Added \(money.formatted()) for \(category.category.title).")
     }

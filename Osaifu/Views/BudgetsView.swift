@@ -27,7 +27,19 @@ struct BudgetsView: View {
     }
 
     private var categoryTotals: [CategoryTotal] {
-        ExpenseAnalytics.categoryTotals(for: monthExpenses, in: currencyCode)
+        ExpenseAnalytics.categoryTotals(
+            for: monthExpenses, in: currencyCode,
+            countsForeignSpend: preferences.max { $0.updatedAt < $1.updatedAt }?.countsForeignSpend ?? false,
+            rates: BudgetReader.rateByCurrency(rates, homeCurrencyCode: currencyCode)
+        )
+    }
+
+    /// A limit set while another currency was home, which no rate can bring
+    /// across. The screen says so rather than draw a bar that means nothing.
+    private var limitNeedingRate: Money? {
+        BudgetReader.limitNeedingRate(
+            budgets: budgets, rates: rates, homeCurrencyCode: currencyCode
+        )
     }
 
     var body: some View {
@@ -35,6 +47,8 @@ struct BudgetsView: View {
             Group {
                 if let progress {
                     content(progress)
+                } else if let staleLimit = limitNeedingRate {
+                    limitInAnotherCurrency(staleLimit)
                 } else {
                     noLimit
                 }
@@ -84,6 +98,19 @@ struct BudgetsView: View {
                     Text("Left out of the total. Settings, under FX Currency, can count them at a rate you give.")
                 }
             }
+        }
+    }
+
+    /// The limit and the home currency no longer match, so there is no honest
+    /// figure to draw until the user gives a rate or sets a new limit.
+    private func limitInAnotherCurrency(_ limit: Money) -> some View {
+        ContentUnavailableView {
+            Label("Limit in Another Currency", systemImage: "exclamationmark.triangle")
+        } description: {
+            Text("Your limit is \(limit.formatted()), and your home currency is now \(currencyCode). Give a rate for \(limit.currencyCode) in Settings, or set a new limit.")
+        } actions: {
+            Button("Set a New Limit") { isEditingLimit = true }
+                .buttonStyle(.borderedProminent)
         }
     }
 

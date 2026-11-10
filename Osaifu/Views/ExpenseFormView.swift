@@ -107,6 +107,7 @@ struct ExpenseFormView: View {
         } else {
             modelContext.insert(Expense(money: money, category: category, note: note, date: date))
         }
+        WidgetRefresh.afterChange()
         dismiss()
     }
 }

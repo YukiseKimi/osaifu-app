@@ -65,7 +65,24 @@ public extension ExpenseAnalytics {
         return (Money(minorUnits: minorUnits, currencyCode: homeCurrencyCode), leftOut)
     }
 
-    /// Where the month stands against the limit.
+    /// The limit in today's home currency, or nil when it cannot get there.
+    ///
+    /// A limit keeps the currency it was set in. If the user later changes
+    /// their home currency, the two are no longer comparable: a rate the user
+    /// has given carries the limit across, and without one there is no honest
+    /// figure to draw.
+    static func limitInHomeCurrency(
+        _ limit: Money,
+        homeCurrencyCode: String,
+        rates: [String: Decimal]
+    ) -> Money? {
+        guard limit.currencyCode != homeCurrencyCode else { return limit }
+        guard let rate = rates[limit.currencyCode], rate > 0 else { return nil }
+        return limit.converted(to: homeCurrencyCode, rate: rate)
+    }
+
+    /// Where the month stands against the limit, or nil when the limit is in
+    /// a currency this month's spending cannot be compared with.
     ///
     /// A carried remainder reads the month before this one against the same
     /// limit. Only what was left carries: a month that went over does not
@@ -74,31 +91,35 @@ public extension ExpenseAnalytics {
         limit: Money,
         expenses: [Expense],
         month: Date,
+        homeCurrencyCode: String,
         carriesRemainderOver: Bool,
         countsForeignSpend: Bool,
         rates: [String: Decimal],
         calendar: Calendar = .current
-    ) -> BudgetProgress {
-        let home = limit.currencyCode
+    ) -> BudgetProgress? {
+        guard let base = limitInHomeCurrency(
+            limit, homeCurrencyCode: homeCurrencyCode, rates: rates
+        ) else { return nil }
+
         let thisMonth = spend(
-            in: expenses, month: month, homeCurrencyCode: home,
+            in: expenses, month: month, homeCurrencyCode: homeCurrencyCode,
             countsForeignSpend: countsForeignSpend, rates: rates, calendar: calendar
         )
 
-        var carried = Money.zero(home)
+        var carried = Money.zero(homeCurrencyCode)
         if carriesRemainderOver,
            let lastMonth = calendar.date(byAdding: .month, value: -1, to: startOfMonth(month, calendar: calendar)) {
             let before = spend(
-                in: expenses, month: lastMonth, homeCurrencyCode: home,
+                in: expenses, month: lastMonth, homeCurrencyCode: homeCurrencyCode,
                 countsForeignSpend: countsForeignSpend, rates: rates, calendar: calendar
             )
-            carried = Money(minorUnits: max(0, limit.minorUnits - before.total.minorUnits), currencyCode: home)
+            carried = Money(minorUnits: max(0, base.minorUnits - before.total.minorUnits), currencyCode: homeCurrencyCode)
         }
 
         return BudgetProgress(
-            baseLimit: limit,
+            baseLimit: base,
             carriedOver: carried,
-            limit: Money(minorUnits: limit.minorUnits + carried.minorUnits, currencyCode: home),
+            limit: Money(minorUnits: base.minorUnits + carried.minorUnits, currencyCode: homeCurrencyCode),
             spent: thisMonth.total,
             leftOutCount: thisMonth.leftOutCount
         )

@@ -61,6 +61,7 @@ struct ExpensesListView: View {
         for index in offsets {
             modelContext.delete(groupExpenses[index])
         }
+        WidgetRefresh.afterChange()
     }
 }
 

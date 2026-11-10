@@ -97,6 +97,7 @@ struct SettingsView: View {
                 Section {
                     Button {
                         SampleData.insert(into: modelContext, currencyCode: currencyCode)
+                        WidgetRefresh.afterChange()
                     } label: {
                         Label("Add Sample Data", systemImage: "wand.and.stars")
                     }
@@ -140,6 +141,7 @@ struct SettingsView: View {
             set: { on in
                 guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode) else { return }
                 row.setCarriesRemainderOver(on)
+                WidgetRefresh.afterChange()
             }
         )
     }
@@ -150,6 +152,7 @@ struct SettingsView: View {
             set: { on in
                 guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode) else { return }
                 row.setCountsForeignSpend(on)
+                WidgetRefresh.afterChange()
             }
         )
     }
@@ -161,6 +164,7 @@ struct SettingsView: View {
             set: { code in
                 guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: code) else { return }
                 row.setHomeCurrencyCode(code)
+                WidgetRefresh.afterChange()
             }
         )
     }
@@ -169,5 +173,6 @@ struct SettingsView: View {
         for expense in expenses {
             modelContext.delete(expense)
         }
+        WidgetRefresh.afterChange()
     }
 }

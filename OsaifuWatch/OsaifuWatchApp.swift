@@ -136,6 +136,7 @@ struct WatchRootView: View {
         guard money.minorUnits > 0, let category else { return }
         modelContext.insert(Expense(money: money, category: category))
         try? modelContext.save()
+        WidgetRefresh.afterChange()
         saved = money
         minorUnits = 0
     }
