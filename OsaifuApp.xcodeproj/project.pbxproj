@@ -11,7 +11,7 @@
 		5046868330A3414A00C4616E /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5046868230A3414A00C4616E /* OsaifuCore */; };
 		50645D802FD98C8100A8E113 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50645D822FD98C8100A8E113 /* OsaifuCore */; };
 		509772CE30A20A0800552730 /* OsaifuWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 502DEEEB30A2082B00C368CF /* OsaifuWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		50B356AE30A34166000FD170 /* OsaifuWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 50F56EE530A340C40047CF32 /* OsaifuWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		50B356AE30A34166000FD170 /* OsaifuWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 50F56EE530A340C40047CF32 /* OsaifuWatch.app */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50BA6EC530A34406007149C8 /* OsaifuWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 50AB6D7F30A343B300775DA2 /* OsaifuWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50DA588930A208CA00A2C055 /* OsaifuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 50DA588830A208CA00A2C055 /* OsaifuCore */; };
 /* End PBXBuildFile section */
@@ -379,6 +379,9 @@
 		};
 		5063EC5D30A3415200292D93 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				ios,
+			);
 			target = 50F56EE430A340C40047CF32 /* OsaifuWatch */;
 			targetProxy = 5063EC5C30A3415200292D93 /* PBXContainerItemProxy */;
 		};

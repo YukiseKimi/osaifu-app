@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # A Run workflow button on the Actions tab. GitHub only shows it for a
+  # workflow that is on the default branch, so it appears once this lands
+  # on main.
+  workflow_dispatch:
+
+concurrency:
+  # A new push to the same branch cancels the run before it.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # One job, not two. A macOS runner is scarce and billed at ten times the
+  # rate of a Linux one: the first run of this workflow queued two macOS jobs,
+  # one waited ten minutes for a runner and the other was cancelled after
+  # fifteen without ever starting. The tests take under a second and the build
+  # under two minutes, so they belong in the same job.
+  macos:
+    name: Tests and build
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the newest Xcode on the runner
+        run: |
+          set -euo pipefail
+          newest=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -n "$newest" ]; then sudo xcode-select -s "$newest"; fi
+          xcodebuild -version
+
+      # The package holds the models, the money type, the migrations and the
+      # analytics. Its tests are headless and take well under a second.
+      - name: Test OsaifuCore
+        run: swift test --package-path OsaifuCore
+
+      # Building the app scheme builds the widget extension and the watch app
+      # with it, because the app embeds them. A runner signs nothing.
+      - name: Build the iPhone app, the widget and the watch app
+        run: |
+          xcodebuild build \
+            -project OsaifuApp.xcodeproj \
+            -scheme Osaifu \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+
+      # The Mac is one of the four platforms, and it broke once without
+      # anyone noticing, so it is built here too.
+      - name: Build for the Mac
+        run: |
+          xcodebuild build \
+            -project OsaifuApp.xcodeproj \
+            -scheme Osaifu \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
