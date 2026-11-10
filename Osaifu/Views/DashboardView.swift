@@ -12,6 +12,10 @@ struct DashboardView: View {
 
     @State private var range: SpendRange = .month
 
+    /// The month the user tapped on the chart. It overrules the range for
+    /// the pie, and nothing else.
+    @State private var chosenMonth: Date?
+
     private var settings: Preferences? {
         preferences.max { $0.updatedAt < $1.updatedAt }
     }
@@ -20,6 +24,17 @@ struct DashboardView: View {
 
     private var rateByCurrency: [String: Decimal] {
         BudgetReader.rateByCurrency(rates, homeCurrencyCode: homeCurrencyCode)
+    }
+
+    /// The period the pie draws: the month the user tapped, else the range.
+    private var pieInterval: DateInterval? {
+        guard let chosenMonth else { return range.interval() }
+        return Calendar.current.dateInterval(of: .month, for: chosenMonth)
+    }
+
+    private var pieTitle: String {
+        guard let chosenMonth else { return "\(range.title), by category" }
+        return "\(chosenMonth.formatted(.dateTime.month(.wide).year())), by category"
     }
 
     var body: some View {
@@ -37,12 +52,12 @@ struct DashboardView: View {
                         CategoryPie(
                             slices: ExpenseAnalytics.byCategory(
                                 expenses,
-                                in: range.interval(),
+                                in: pieInterval,
                                 homeCurrencyCode: homeCurrencyCode,
                                 countsForeignSpend: countsForeignSpend,
                                 rates: rateByCurrency
                             ),
-                            title: "\(range.title), by category"
+                            title: pieTitle
                         )
 
                         MonthBars(
@@ -53,7 +68,8 @@ struct DashboardView: View {
                                 countsForeignSpend: countsForeignSpend,
                                 rates: rateByCurrency
                             ),
-                            title: "Each month of \(Date.now.formatted(.dateTime.year()))"
+                            title: "Each month of \(Date.now.formatted(.dateTime.year()))",
+                            chosen: $chosenMonth
                         )
 
                         YearBars(
@@ -71,6 +87,8 @@ struct DashboardView: View {
             }
             .moodBackground()
             .navigationTitle("Dashboard")
+            // A new range is a new question, so the month goes back to none.
+            .onChange(of: range) { _, _ in chosenMonth = nil }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Picker("Range", selection: $range) {
