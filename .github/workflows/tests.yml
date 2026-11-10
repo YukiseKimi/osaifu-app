@@ -11,9 +11,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  package:
-    name: OsaifuCore tests
+  # One job, not two. A macOS runner is scarce and billed at ten times the
+  # rate of a Linux one: the first run of this workflow queued two macOS jobs,
+  # one waited ten minutes for a runner and the other was cancelled after
+  # fifteen without ever starting. The tests take under a second and the build
+  # under two minutes, so they belong in the same job.
+  macos:
+    name: Tests and build
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -26,21 +32,8 @@ jobs:
 
       # The package holds the models, the money type, the migrations and the
       # analytics. Its tests are headless and take well under a second.
-      - name: Test
+      - name: Test OsaifuCore
         run: swift test --package-path OsaifuCore
-
-  app:
-    name: Build every target
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Pick the newest Xcode on the runner
-        run: |
-          set -euo pipefail
-          newest=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1 || true)
-          if [ -n "$newest" ]; then sudo xcode-select -s "$newest"; fi
-          xcodebuild -version
 
       # Building the app scheme builds the widget extension and the watch app
       # with it, because the app embeds them. A runner signs nothing.
@@ -50,5 +43,16 @@ jobs:
             -project OsaifuApp.xcodeproj \
             -scheme Osaifu \
             -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+
+      # The Mac is one of the four platforms, and it broke once without
+      # anyone noticing, so it is built here too.
+      - name: Build for the Mac
+        run: |
+          xcodebuild build \
+            -project OsaifuApp.xcodeproj \
+            -scheme Osaifu \
+            -destination 'platform=macOS' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO
