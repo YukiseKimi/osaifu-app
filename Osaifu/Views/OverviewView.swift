@@ -63,6 +63,8 @@ struct OverviewView: View {
                     content
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(A11yID.Overview.list)
             .moodBackground()
             .navigationTitle("This Month")
             .toolbar {
@@ -73,6 +75,7 @@ struct OverviewView: View {
                     Button("Add Expense", systemImage: "plus") {
                         isAddingExpense = true
                     }
+                    .accessibilityIdentifier(A11yID.Overview.add)
                 }
             }
             .sheet(isPresented: $isAddingExpense) {
@@ -210,5 +213,8 @@ private struct CategoryRow: View {
             Text(item.total.formatted())
                 .monospacedDigit()
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(A11yID.Overview.categoryRow(item.category.rawValue))
+        .accessibilityValue(item.total.formatted())
     }
 }
