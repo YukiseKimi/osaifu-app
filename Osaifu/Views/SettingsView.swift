@@ -105,6 +105,7 @@ struct SettingsView: View {
                     #if DEBUG
                     Button {
                         SampleData.insert(into: modelContext, currencyCode: currencyCode)
+                        try? modelContext.save()
                         WidgetRefresh.afterChange()
                     } label: {
                         Label("Add Sample Data", systemImage: "wand.and.stars")
@@ -148,24 +149,38 @@ struct SettingsView: View {
             .sorted()
     }
 
+    /// Changes the one synced settings row, writes it to the store, and asks
+    /// the widgets to read it again.
+    ///
+    /// The save is not optional. The widget, the complication and the intent
+    /// are other processes: they read the store on disk, so a change that is
+    /// still only in this context reaches none of them, and a force quit
+    /// before SwiftData's own save loses it. This is the one place the three
+    /// rows below write, so none of them can forget.
+    private func write(_ change: (Preferences) -> Void, fallbackCurrencyCode: String) {
+        guard let row = try? Preferences.current(
+            in: modelContext,
+            fallbackCurrencyCode: fallbackCurrencyCode
+        ) else { return }
+        change(row)
+        try? modelContext.save()
+        WidgetRefresh.afterChange()
+    }
+
     private var carriesRemainderOver: Binding<Bool> {
         Binding(
-            get: { (try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode))?.carriesRemainderOver ?? false },
+            get: { settings.carriesRemainderOver },
             set: { on in
-                guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode) else { return }
-                row.setCarriesRemainderOver(on)
-                WidgetRefresh.afterChange()
+                write({ $0.setCarriesRemainderOver(on) }, fallbackCurrencyCode: currencyCode)
             }
         )
     }
 
     private var countsForeignSpend: Binding<Bool> {
         Binding(
-            get: { (try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode))?.countsForeignSpend ?? false },
+            get: { settings.countsForeignSpend },
             set: { on in
-                guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: currencyCode) else { return }
-                row.setCountsForeignSpend(on)
-                WidgetRefresh.afterChange()
+                write({ $0.setCountsForeignSpend(on) }, fallbackCurrencyCode: currencyCode)
             }
         )
     }
@@ -175,9 +190,7 @@ struct SettingsView: View {
         Binding(
             get: { currencyCode },
             set: { code in
-                guard let row = try? Preferences.current(in: modelContext, fallbackCurrencyCode: code) else { return }
-                row.setHomeCurrencyCode(code)
-                WidgetRefresh.afterChange()
+                write({ $0.setHomeCurrencyCode(code) }, fallbackCurrencyCode: code)
             }
         )
     }

@@ -59,7 +59,7 @@ Shopping · Education · Travel · Other — each with its own icon and a consis
 | Widgets | WidgetKit, on the Home Screen and on the watch face |
 | Voice | App Intents |
 | Settings | A synced `Preferences` record, so a change on one device reaches the rest |
-| Tests | Swift Testing — 92 headless tests, no simulator |
+| Tests | Swift Testing — 119 headless tests, no simulator — and XCUITest journeys for the flows a person goes through |
 
 ## Requirements
 
@@ -79,38 +79,68 @@ Shopping · Education · Travel · Other — each with its own icon and a consis
 To test sync, run the app on two devices or simulators signed into the **same iCloud account**
 and add an expense on one.
 
-`swift test --package-path OsaifuCore` runs the whole test suite in under a second, with no
-simulator.
+Before the first build you archive for TestFlight or the App Store, check the embedded
+entitlements of the archived app: CloudKit sync rides on silent pushes, so `aps-environment`
+(iOS) and `com.apple.developer.aps-environment` (macOS) must read `production` there, whatever
+the checked-in entitlements file says. Xcode substitutes the iOS one when it signs for
+distribution.
+
+## Tests
+
+`script/test.sh` is the one way to run them:
+
+| Lane | What it runs |
+| --- | --- |
+| `packages` | the 119 headless tests of `OsaifuCore`, in under a second, with no simulator |
+| `ids` | the app's accessibility identifiers against the UI target's mirror of them |
+| `journey [Class/test]` | the XCUITest journeys, on the simulator named by `OSAIFU_SIM` |
+| `build` | Release builds for iOS and the Mac, and the check that a Release app refuses a sealed launch |
+
+CI runs `packages`, `ids` and the two builds on every push. The journeys need a booted
+simulator and a signed widget extension, so they stay local:
+
+```
+OSAIFU_SIM=<simulator UDID> script/test.sh journey
+```
 
 ## Project structure
 
 ```
 OsaifuCore/            # the shared Swift package: iOS, watchOS, macOS
-├─ Sources/OsaifuCore/
+├─ Sources/OsaifuModel/    # Foundation and SwiftData, nothing else
 │  ├─ Expense.swift        Budget.swift      Preferences.swift   ExchangeRate.swift
 │  ├─ Money.swift          Currency.swift    AmountStep.swift    SpendRange.swift
+│  ├─ AppSettings.swift    # the three settings questions, answered once
 │  ├─ Schema.swift         StoreSetup.swift  # versioned schema, migrations, the store
-│  ├─ ExpenseAnalytics.swift  BudgetProgress.swift  SpendBuckets.swift  BudgetReader.swift
-│  └─ SyncStatus.swift     SyncMonitor.swift SyncBadge.swift     WidgetRefresh.swift
-└─ Tests/OsaifuCoreTests/  # 92 tests, headless
+│  └─ ExpenseAnalytics.swift  BudgetProgress.swift  SpendBuckets.swift
+│     BudgetReader.swift     StoreSnapshot.swift   # what a widget reads, in one go
+├─ Sources/OsaifuSync/     # what the platform says about iCloud, and WidgetKit
+│  └─ SyncStatus.swift     WidgetRefresh.swift
+├─ Sources/OsaifuUI/       # the few views and the colours every app shares
+│  └─ SyncBadge.swift      SyncMonitor.swift  RemoteChangeRefresh.swift
+│     ExpenseCategoryColours.swift
+└─ Tests/OsaifuCoreTests/  # 119 tests, headless
 
 Osaifu/                # the app: iPhone, iPad, Mac
 ├─ ContentView.swift       # the app entry point and the tabs
 ├─ Intents/                # the Siri and Shortcuts intent
-├─ Support/                # the theme and the home-currency environment
+├─ Support/                # the theme and the settings environment
+├─ Testing/                # the identifier registry and the sealed launch
 └─ Views/                  # the pad, This Month, Budget, Expenses, History,
                            # Settings, and the iPad Dashboard with its charts
 
 OsaifuWidgets/         # the Home Screen widget
 OsaifuWatch/           # the watch app
 OsaifuWatchWidgets/    # the complication and the Smart Stack card
+OsaifuUITests/         # the journeys, their screen helpers and the id mirror
+script/test.sh         # the one way to run the tests
 ```
 
 ## Roadmap
 
 - A limit for each category, beside the one for the month
 - CSV export
-- Narrowing the SwiftData queries with `#Predicate`, rather than filtering in memory
+- The strings in a `Localizable.xcstrings`, so the app can be read in Japanese
 
 ## License
 

@@ -67,6 +67,10 @@ lane_journey() {
     # This lane signs. An unsigned widget extension cannot launch, and the
     # system starts it when the app is installed, which fails the test before
     # it reaches the first screen.
+    # The bash on a Mac is 3.2, where "${empty[@]}" under set -u is an
+    # unbound variable and not an empty list, so the expansion below carries
+    # its own default. Without it the whole-suite form of this lane could
+    # never run at all.
     local only=()
     [ $# -gt 0 ] && only=(-only-testing:"OsaifuUITests/$1")
 
@@ -89,7 +93,7 @@ lane_journey() {
         -project "$PROJECT" -scheme "$SCHEME" \
         -destination "id=$sim" -configuration Debug \
         -parallel-testing-enabled NO \
-        "${only[@]}" 2>&1)
+        ${only[@]+"${only[@]}"} 2>&1)
     finish=$(date +%s)
 
     # test-without-building prints TEST EXECUTE SUCCEEDED, not TEST SUCCEEDED.

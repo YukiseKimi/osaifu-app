@@ -39,6 +39,17 @@ jobs:
       - name: Test OsaifuCore
         run: swift test --package-path OsaifuCore
 
+      # The app owns the accessibility identifiers and the UI test target
+      # mirrors them, because a test bundle cannot import the app. Nothing
+      # but this notices when the two drift, and a journey that looks for an
+      # identifier the app no longer gives quietly stops checking anything.
+      # It is a grep: no simulator, no signing, no seconds worth counting.
+      #
+      # The journey itself is not here. It needs a booted simulator and a
+      # signed widget extension, and a runner signs nothing.
+      - name: Check the identifier registry against its mirror
+        run: script/test.sh ids
+
       # Building the app scheme builds the widget extension and the watch app
       # with it, because the app embeds them. A runner signs nothing.
       - name: Build the iPhone app, the widget and the watch app

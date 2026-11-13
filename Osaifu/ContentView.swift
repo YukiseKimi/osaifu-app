@@ -90,6 +90,7 @@ struct RootView: View {
         .preferredColorScheme(appearance.colorScheme)
         .environment(\.settings, settings)
         .environment(sync)
+        .refreshesWidgetsOnRemoteChange()
         .task {
             // Makes the one settings row, and drops any duplicate that iCloud
             // delivered from another device.

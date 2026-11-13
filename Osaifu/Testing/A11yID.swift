@@ -2,8 +2,12 @@
 ///
 /// A journey never writes a raw string: it asks for one of these, so a
 /// renamed control is a compile error in the test rather than a test that
-/// quietly stops checking anything. The table in A11yID.md is generated from
-/// this file; `script/test.sh ids` fails when the two disagree.
+/// quietly stops checking anything.
+///
+/// A UI test bundle cannot import the app, so `OsaifuUITests` keeps a mirror
+/// of this list in `A11yIDMirror.swift`. `script/test.sh ids` compares the
+/// two and fails the run when they differ, which is what keeps them one
+/// list. CI runs that lane on every push.
 enum A11yID {
 
     enum Overview {

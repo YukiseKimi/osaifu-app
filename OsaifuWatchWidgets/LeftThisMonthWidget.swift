@@ -59,19 +59,26 @@ struct LeftView: View {
 
     private var left: Money? { entry.progress?.remaining }
 
+    /// The figure on the face: what is left, or what the month has spent when
+    /// there is no limit to be left of.
+    private var figure: Money { left ?? entry.spent }
+
     var body: some View {
         switch family {
         case .accessoryCircular:
             Gauge(value: entry.progress?.fraction ?? 0) {
-                Image(systemName: "yensign")
+                // The sign of the currency the figure is actually in. The
+                // number beside it goes without, so the two do not say it
+                // twice in a space this small.
+                Text(Currency.symbol(forCode: figure.currencyCode))
             } currentValueLabel: {
-                Text(short(left ?? entry.spent))
+                Text(short(figure))
                     .minimumScaleFactor(0.5)
             }
             .gaugeStyle(.accessoryCircularCapacity)
 
         case .accessoryCorner:
-            Text(short(left ?? entry.spent))
+            Text(signed(figure))
                 .widgetLabel {
                     ProgressView(value: entry.progress?.fraction ?? 0)
                 }
@@ -81,7 +88,7 @@ struct LeftView: View {
                 Text(left == nil ? "Spent this month" : "Left this month")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text((left ?? entry.spent).formatted())
+                Text(figure.formatted())
                     .font(.headline)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
@@ -100,5 +107,11 @@ struct LeftView: View {
         money.decimalValue.formatted(
             .number.notation(.compactName).precision(.fractionLength(0))
         )
+    }
+
+    /// The short figure with its currency's sign, for a corner that has
+    /// nowhere else to say which money this is: ¥21K, $240.
+    private func signed(_ money: Money) -> String {
+        Currency.symbol(forCode: money.currencyCode) + short(money)
     }
 }
