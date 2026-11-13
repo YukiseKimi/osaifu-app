@@ -34,6 +34,17 @@ jobs:
           if [ -n "$newest" ]; then sudo xcode-select -s "$newest"; fi
           xcodebuild -version
 
+          # Say so when the runner is behind what the project targets, rather
+          # than leave it in the log for someone to find the hard way. The
+          # job passed for months against the SDKs of the major version
+          # before this one: it compiled only because nothing reached for an
+          # API newer than them, and the first one that did failed here and
+          # nowhere else.
+          major=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          if [ "${major:-0}" -lt 27 ]; then
+            echo "::warning title=The runner's Xcode is behind this project::Xcode $major is the newest here, and Osaifu targets iOS 27 and macOS 27. These SDKs are a major version older than the deployment targets, so this job cannot see a 27-only API or a 27-only deprecation. It proves the project builds, not that it builds against the SDK it asks for."
+          fi
+
       # The package holds the models, the money type, the migrations and the
       # analytics. Its tests are headless and take well under a second.
       - name: Test OsaifuCore
