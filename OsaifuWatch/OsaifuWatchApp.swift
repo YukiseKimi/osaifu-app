@@ -87,18 +87,23 @@ struct WatchRootView: View {
     }
 
     var body: some View {
-        if let saved {
-            SavedView(
-                money: saved,
-                category: category,
-                progress: progress,
-                spent: spentThisMonth,
-                onDone: { self.saved = nil }
-            )
-            .sensoryFeedback(.success, trigger: saved)
-        } else {
-            pad
+        // The group holds the two screens together, so the watch keeps one
+        // watcher on the store across a save and not one for each screen.
+        Group {
+            if let saved {
+                SavedView(
+                    money: saved,
+                    category: category,
+                    progress: progress,
+                    spent: spentThisMonth,
+                    onDone: { self.saved = nil }
+                )
+                .sensoryFeedback(.success, trigger: saved)
+            } else {
+                pad
+            }
         }
+        .refreshesWidgetsOnRemoteChange()
     }
 
     private var pad: some View {

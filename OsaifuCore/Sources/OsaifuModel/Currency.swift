@@ -20,6 +20,17 @@ public struct Currency: Identifiable, Hashable, Sendable {
     /// The currency code used before the user picks one, taken from the device locale.
     public static let defaultCode = Locale.current.currency?.identifier ?? "USD"
 
+    /// The sign for one currency code, for a face that has room for a glyph
+    /// and not a word: "¥", "$", "£".
+    ///
+    /// A watch complication showed a yen sign whatever the home currency was,
+    /// which told a reader in dollars the wrong thing about their own money.
+    /// A currency this list does not name shows its code instead, which is
+    /// three characters and never wrong.
+    public static func symbol(forCode code: String) -> String {
+        common.first { $0.code == code }?.symbol ?? code
+    }
+
     /// A curated list of common currencies offered in Settings.
     public static let common: [Currency] = [
         Currency(code: "USD", symbol: "$"),

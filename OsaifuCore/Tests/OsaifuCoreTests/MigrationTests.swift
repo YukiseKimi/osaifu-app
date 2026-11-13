@@ -195,6 +195,51 @@ struct BackupTests {
     }
 }
 
+/// A widget, a complication and an App Intent read the store the app keeps.
+/// None of them may make it or migrate it, and these pin why.
+@Suite("What an extension may open")
+struct ExtensionStoreTests {
+
+    @Test("An extension reads the store the app has already opened")
+    func opensAPreparedStore() {
+        #expect(StoreSetup.extensionMayOpen(
+            storeExists: true,
+            lastOpenedVersion: StoreSetup.currentSchemaVersion
+        ))
+    }
+
+    /// The copy into the App Group only ever runs while the group holds no
+    /// store. A widget that made an empty one there first would leave the
+    /// app's real store orphaned, and every expense with it.
+    @Test("An extension never makes the store")
+    func refusesWhenThereIsNoStore() {
+        #expect(!StoreSetup.extensionMayOpen(
+            storeExists: false,
+            lastOpenedVersion: StoreSetup.currentSchemaVersion
+        ))
+        #expect(!StoreSetup.extensionMayOpen(storeExists: false, lastOpenedVersion: nil))
+    }
+
+    /// A migration is minutes of work on a large store, and a widget has
+    /// seconds. The app does it, and the widget waits.
+    @Test("An extension never migrates the store", arguments: [nil, "1.0.0", "3.0.0"])
+    func refusesAMigration(lastOpenedVersion: String?) {
+        #expect(!StoreSetup.extensionMayOpen(
+            storeExists: true,
+            lastOpenedVersion: lastOpenedVersion
+        ))
+    }
+
+    /// Siri shows what an intent throws, so the refusal has to be a sentence
+    /// the person can act on and not the reason underneath it.
+    @Test("A refusal says what to do about it")
+    func refusalReadsAsASentence() {
+        let refusal = StoreSetup.NotReady(reason: "the app has not opened the store yet")
+        #expect(refusal.errorDescription == "Open Osaifu on this device once, and this will work.")
+        #expect(refusal.localizedDescription == "Open Osaifu on this device once, and this will work.")
+    }
+}
+
 /// The old Double is the only bridge from the first version's data. These
 /// pin what it is for, so that removing it is a decision and not an accident.
 @Suite("The amount the first version wrote")
@@ -202,11 +247,19 @@ struct LegacyAmountTests {
 
     @Test("The migration reads it, and leaves it where it is")
     func migrationReadsIt() throws {
+        let context = ModelContext(try StoreSetup.makeInMemoryContainer())
         let expense = Expense(money: Money(minorUnits: 0, currencyCode: ""), category: .other)
         expense.amount = 12.8
+        // The migration works on what the context holds. Without this insert
+        // the function has nothing to read and the test cannot fail.
+        context.insert(expense)
 
-        try OsaifuMigrationPlan.fillMinorUnits(in: ModelContext(StoreSetup.makeInMemoryContainer()), currencyCode: "USD")
-        // The function works on what the context holds, so check it directly.
+        try OsaifuMigrationPlan.fillMinorUnits(in: context, currencyCode: "USD")
+
+        // It read the old Double...
+        #expect(expense.minorUnits == 1280)
+        #expect(expense.currencyCode == "USD")
+        // ...and left it where it is, as the only bridge from version 1.
         #expect(expense.amount == 12.8)
     }
 

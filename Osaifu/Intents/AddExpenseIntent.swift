@@ -12,7 +12,11 @@ import OsaifuSync
 struct AddExpenseIntent: AppIntent {
     static let title: LocalizedStringResource = "Add an Expense"
     static let description = IntentDescription("Adds an expense to Osaifu, in your home currency.")
-    static let openAppWhenRun = false
+
+    /// It files the expense and says so; there is nothing to see in the app.
+    /// This replaces `openAppWhenRun`, which is deprecated and which an
+    /// intent that runs in an extension may not set at all.
+    static let supportedModes: IntentModes = .background
 
     @Parameter(title: "Amount")
     var amount: Double

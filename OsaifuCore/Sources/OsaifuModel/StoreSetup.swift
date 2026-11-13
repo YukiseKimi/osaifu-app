@@ -25,26 +25,83 @@ public enum StoreSetup {
         }
     }
 
+    /// The store the app has not prepared yet, so an extension must leave it
+    /// alone. The widget shows nothing, and the intent says this.
+    public struct NotReady: LocalizedError {
+        public let reason: String
+
+        public init(reason: String) {
+            self.reason = reason
+        }
+
+        public var errorDescription: String? {
+            "Open Osaifu on this device once, and this will work."
+        }
+
+        public var failureReason: String? { reason }
+    }
+
     /// The one container this process opens, made the first time it is asked
     /// for.
     ///
-    /// Opening a container is not cheap: it checks the schema version, may
-    /// copy the store into the App Group and may take a backup. A widget
-    /// timeline and a Siri intent each used to do all of that on every run.
-    @MainActor
-    private static var opened: Result<ModelContainer, any Error>?
-
-    /// The live store, opened once per process.
+    /// Opening a container is not cheap: it checks the schema version and may
+    /// take a backup. A widget timeline and a Siri intent each used to do all
+    /// of that on every run.
     ///
-    /// Call this from anything that runs more than once: a widget provider,
-    /// an App Intent. An app that opens the store at launch and keeps it can
-    /// call `makeContainer()` directly.
+    /// Only a success is kept. A failure that is remembered outlives what
+    /// caused it: one locked store while the app migrated used to leave a Siri
+    /// intent refusing every expense for as long as its process lived.
+    @MainActor
+    private static var opened: ModelContainer?
+
+    /// The store an extension reads: a widget, a complication, an App Intent.
+    /// An app opens the store itself, with `makeContainer()`.
+    ///
+    /// An extension never makes the store and never migrates it. Both belong
+    /// to the app:
+    ///
+    /// - A widget that finds no store in the App Group and makes an empty one
+    ///   there leaves the app's real store orphaned for good, because the copy
+    ///   into the group only ever runs while the group holds no store. The
+    ///   user would open the app after an update to find every expense gone,
+    ///   with the old store still on the disk and nothing to read it.
+    /// - A migration is minutes of work on a large store, and a widget has
+    ///   seconds and a few megabytes. A figure that is one version old, or no
+    ///   figure at all, is better than a store half moved.
     @MainActor
     public static func sharedContainer() throws -> ModelContainer {
-        if let opened { return try opened.get() }
-        let result = Result { try makeContainer() }
-        opened = result
-        return try result.get()
+        if let opened { return opened }
+        let store = try extensionContainer()
+        opened = store
+        return store
+    }
+
+    /// The store as it already stands in the App Group, or `NotReady`.
+    static func extensionContainer() throws -> ModelContainer {
+        let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
+        guard canUseAppGroup(appGroupID) else {
+            throw NotReady(reason: "this process cannot reach the App Group")
+        }
+        let shared = ModelConfiguration(
+            schema: schema,
+            groupContainer: .identifier(appGroupID),
+            cloudKitDatabase: .automatic
+        )
+        guard extensionMayOpen(
+            storeExists: FileManager.default.fileExists(atPath: shared.url.path),
+            lastOpenedVersion: sharedDefaults.string(forKey: storeVersionKey)
+        ) else {
+            throw NotReady(reason: "the app has not opened the store with this build yet")
+        }
+        // No migration plan: this store is already at this build's version,
+        // and if it somehow is not, failing here is the point.
+        return try ModelContainer(for: schema, configurations: shared)
+    }
+
+    /// Whether an extension may open the shared store: the store must be
+    /// there, and the app must have opened it with this build already.
+    static func extensionMayOpen(storeExists: Bool, lastOpenedVersion: String?) -> Bool {
+        storeExists && !migrationIsExpected(lastOpenedVersion: lastOpenedVersion)
     }
 
     /// The live store, with iCloud mirroring and the migration plan.
@@ -88,7 +145,7 @@ public enum StoreSetup {
         let backup = migrationIsExpected() ? try? backUpStore(at: configuration.url) : nil
         do {
             let store = try container(schema: schema, configuration: configuration)
-            UserDefaults.standard.set(currentSchemaVersion, forKey: storeVersionKey)
+            sharedDefaults.set(currentSchemaVersion, forKey: storeVersionKey)
             return store
         } catch {
             throw Failure(underlying: error, backupURL: backup)
@@ -103,19 +160,46 @@ public enum StoreSetup {
 
     static let storeVersionKey = "OsaifuStoreSchemaVersion"
 
+    /// The defaults that every Osaifu process reads: the App Group's, because
+    /// the store is the App Group's too.
+    ///
+    /// `UserDefaults.standard` is a different place in each one of them. The
+    /// version of the store was kept there, so the app would migrate the
+    /// store, write "4.0.0" into its own defaults, and the widget, the
+    /// complication and the watch would each still believe a migration was
+    /// due and copy the whole store, one by one, inside their own tiny
+    /// budgets.
+    ///
+    /// It falls back to this process's own defaults wherever the group is out
+    /// of reach, because the store is then this process's own too: a suite for
+    /// a group this process is not entitled to reads back empty every time,
+    /// which would have the app believe a migration was due on every launch
+    /// and copy the store before each one.
+    static var sharedDefaults: UserDefaults {
+        guard canUseAppGroup(appGroupID), let shared = UserDefaults(suiteName: appGroupID) else {
+            return .standard
+        }
+        return shared
+    }
+
     /// True when the store was last opened by a build that knew another schema,
     /// which is when SwiftData runs a migration. It is also true on the first
     /// launch of this build for an older store, which never wrote the key.
     public static func migrationIsExpected() -> Bool {
-        migrationIsExpected(lastOpenedVersion: UserDefaults.standard.string(forKey: storeVersionKey))
+        migrationIsExpected(lastOpenedVersion: sharedDefaults.string(forKey: storeVersionKey))
     }
 
     static func migrationIsExpected(lastOpenedVersion: String?) -> Bool {
         lastOpenedVersion != currentSchemaVersion
     }
 
-    /// True when this app may read the group container. It is false in a test
-    /// process, and on a device that was never provisioned for the group.
+    /// True when this process may read the group container: false on a device
+    /// that was never provisioned for the group.
+    ///
+    /// It is true on the Mac outside a sandbox, a `swift test` run included,
+    /// where Foundation hands back a path under `~/Library/Group Containers`
+    /// and asks nobody. So this answers "is the group reachable", never "is
+    /// this a test".
     public static func canUseAppGroup(_ identifier: String) -> Bool {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier) != nil
     }

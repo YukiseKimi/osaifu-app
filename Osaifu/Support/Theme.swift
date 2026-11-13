@@ -47,8 +47,15 @@ struct MoodBackground: View {
                     .blur(radius: 100)
                     .offset(x: w * 0.10, y: h * 0.52)
             }
+            // Three overlapping 100-point blurs become one texture, drawn
+            // when the size changes and not while a list scrolls over them.
+            // The bottom layer is opaque, so there is nothing behind this to
+            // blend with and nothing to lose by flattening it.
+            .drawingGroup()
         }
         .ignoresSafeArea()
+        // It is a backdrop. Nothing on it is for tapping.
+        .allowsHitTesting(false)
     }
 }
 
