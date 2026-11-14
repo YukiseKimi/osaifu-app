@@ -32,7 +32,12 @@ jobs:
           set -euo pipefail
           newest=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1 || true)
           if [ -n "$newest" ]; then sudo xcode-select -s "$newest"; fi
-          xcodebuild -version
+          # Read the version once, into a variable. Piping xcodebuild into
+          # `head` closes the pipe early, xcodebuild dies of a broken pipe
+          # when it writes the second line, and pipefail fails the job. It
+          # was a race, so it passed on PR #9 and failed on its merge.
+          version=$(xcodebuild -version)
+          echo "$version"
 
           # Say so when the runner is behind what the project targets, rather
           # than leave it in the log for someone to find the hard way. The
@@ -40,7 +45,7 @@ jobs:
           # before this one: it compiled only because nothing reached for an
           # API newer than them, and the first one that did failed here and
           # nowhere else.
-          major=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          major=$(printf '%s\n' "$version" | sed -nE '1s/^Xcode ([0-9]+).*/\1/p')
           if [ "${major:-0}" -lt 27 ]; then
             echo "::warning title=The runner's Xcode is behind this project::Xcode $major is the newest here, and Osaifu targets iOS 27 and macOS 27. These SDKs are a major version older than the deployment targets, so this job cannot see a 27-only API or a 27-only deprecation. It proves the project builds, not that it builds against the SDK it asks for."
           fi
