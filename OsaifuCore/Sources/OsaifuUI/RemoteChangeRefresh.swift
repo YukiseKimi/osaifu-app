@@ -25,10 +25,15 @@ private struct RemoteChangeRefresh: ViewModifier {
 
     /// A first sync writes every expense the account holds, and posts as it
     /// goes. The wait gathers that burst into the one redraw it deserves.
-    private var remoteChanges: AnyPublisher<Void, Never> {
+    ///
+    /// No closure of ours may sit before the debounce. Core Data posts this
+    /// notification on its own background queue, and a closure written in a
+    /// view is main-actor code, so Swift 6 traps the moment it runs there
+    /// (`_dispatch_assert_queue_fail`). The debounce delivers on the main run
+    /// loop, so everything after it is on the main thread.
+    private var remoteChanges: AnyPublisher<Notification, Never> {
         NotificationCenter.default
             .publisher(for: .NSPersistentStoreRemoteChange)
-            .map { _ in () }
             .debounce(for: .seconds(2), scheduler: RunLoop.main)
             .eraseToAnyPublisher()
     }
