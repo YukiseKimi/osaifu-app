@@ -117,7 +117,7 @@ struct WatchRootView: View {
                 // anywhere, which is what the watch cannot promise.
                 SyncBadge(account: sync.account, isConnecting: sync.isConnecting)
                 if let category {
-                    Text(category.title)
+                    Text(category.title.localizedInApp)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

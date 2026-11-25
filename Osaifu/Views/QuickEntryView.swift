@@ -102,7 +102,7 @@ struct QuickEntryView: View {
                     Button {
                         category = option
                     } label: {
-                        Label(option.title, systemImage: option.systemImage)
+                        Label(option.title.localizedInApp, systemImage: option.systemImage)
                             .font(.subheadline)
                             .lineLimit(1)
                     }

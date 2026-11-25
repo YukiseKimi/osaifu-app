@@ -75,7 +75,7 @@ private struct ExpenseRow: View {
         HStack(spacing: 12) {
             CategoryIcon(category: expense.category)
             VStack(alignment: .leading, spacing: 2) {
-                Text(expense.category.title)
+                Text(expense.category.title.localizedInApp)
                 if !expense.note.isEmpty {
                     Text(expense.note)
                         .font(.caption)

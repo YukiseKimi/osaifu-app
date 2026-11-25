@@ -8,7 +8,7 @@ struct YearBars: View {
     let years: [SpendBucket]
 
     var body: some View {
-        DashboardCard(title: "Each year") {
+        DashboardCard(title: "Each year".localizedInApp) {
             if years.isEmpty {
                 Text("Nothing recorded yet.")
                     .font(.callout)

@@ -21,8 +21,10 @@ struct DashboardView: View {
     }
 
     private var pieTitle: String {
-        guard let chosenMonth else { return "\(range.title), by category" }
-        return "\(chosenMonth.formatted(.dateTime.month(.wide).year())), by category"
+        guard let chosenMonth else {
+            return String(localized: "\(range.title.localizedInApp), by category")
+        }
+        return String(localized: "\(chosenMonth.formatted(.dateTime.month(.wide).year())), by category")
     }
 
     var body: some View {
@@ -60,7 +62,7 @@ struct DashboardView: View {
                                     countsForeignSpend: settings.countsForeignSpend,
                                     rates: settings.rates
                                 ),
-                                title: "Each month of \(Date.now.formatted(.dateTime.year()))",
+                                title: String(localized: "Each month of \(Date.now.formatted(.dateTime.year()))"),
                                 chosen: $chosenMonth
                             )
                         }
@@ -86,7 +88,7 @@ struct DashboardView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Picker("Range", selection: $range) {
                         ForEach(SpendRange.allCases) { period in
-                            Text(period.title).tag(period)
+                            Text(period.title.localizedInApp).tag(period)
                         }
                     }
                     .pickerStyle(.menu)

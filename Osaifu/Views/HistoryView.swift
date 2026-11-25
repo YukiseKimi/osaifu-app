@@ -52,7 +52,7 @@ struct HistoryView: View {
                                 ForEach(summary.categoryTotals) { item in
                                     HStack(spacing: 12) {
                                         CategoryIcon(category: item.category, size: 30)
-                                        Text(item.category.title)
+                                        Text(item.category.title.localizedInApp)
                                         Spacer()
                                         Text(item.total.formatted())
                                             .monospacedDigit()
@@ -81,11 +81,11 @@ struct HistoryView: View {
                 x: .value("Month", row.monthStart, unit: .month),
                 y: .value("Amount", row.total.plotValue)
             )
-            .foregroundStyle(by: .value("Category", row.category.title))
+            .foregroundStyle(by: .value("Category", row.category.title.localizedInApp))
             .cornerRadius(4)
         }
         .chartForegroundStyleScale(
-            domain: usedCategories.map(\.title),
+            domain: usedCategories.map(\.title.localizedInApp),
             range: usedCategories.map(\.color)
         )
         .chartXAxis {

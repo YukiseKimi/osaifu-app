@@ -53,7 +53,7 @@ struct ExpenseFormView: View {
                 Section("Category") {
                     Picker("Category", selection: $category) {
                         ForEach(ExpenseCategory.allCases) { category in
-                            Label(category.title, systemImage: category.systemImage)
+                            Label(category.title.localizedInApp, systemImage: category.systemImage)
                                 .tag(category)
                         }
                     }

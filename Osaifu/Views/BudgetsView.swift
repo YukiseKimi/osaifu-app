@@ -181,7 +181,7 @@ private struct CategoryShareRow: View {
         HStack(spacing: 12) {
             CategoryIcon(category: item.category, size: 30)
             VStack(alignment: .leading) {
-                Text(item.category.title)
+                Text(item.category.title.localizedInApp)
                 Text(share, format: .percent.precision(.fractionLength(0)))
                     .font(.caption)
                     .foregroundStyle(.secondary)

@@ -156,10 +156,10 @@ private struct OverviewChart: View {
                     angularInset: 1.5
                 )
                 .cornerRadius(4)
-                .foregroundStyle(by: .value("Category", item.category.title))
+                .foregroundStyle(by: .value("Category", item.category.title.localizedInApp))
             }
             .chartForegroundStyleScale(
-                domain: totals.map(\.category.title),
+                domain: totals.map(\.category.title.localizedInApp),
                 range: totals.map(\.category.color)
             )
             .chartLegend(.hidden)
@@ -197,7 +197,7 @@ private struct OtherCurrenciesSection: View {
         ForEach(expenses) { expense in
             HStack(spacing: 12) {
                 CategoryIcon(category: expense.category, size: 30)
-                Text(expense.category.title)
+                Text(expense.category.title.localizedInApp)
                 Spacer()
                 Text(expense.money.formatted())
                     .monospacedDigit()
@@ -220,7 +220,7 @@ private struct CategoryRow: View {
         HStack(spacing: 12) {
             CategoryIcon(category: item.category)
             VStack(alignment: .leading) {
-                Text(item.category.title)
+                Text(item.category.title.localizedInApp)
                 Text(share, format: .percent.precision(.fractionLength(0)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
