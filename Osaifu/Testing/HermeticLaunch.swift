@@ -31,6 +31,12 @@ enum HermeticLaunch {
         isAllowed && arguments.contains(LaunchFlag.sealed.rawValue)
     }
 
+    /// True when this launch should put the first-run questions up although
+    /// it is sealed. Only the journey that drives them passes this.
+    static func showsWelcome(arguments: [String] = CommandLine.arguments) -> Bool {
+        isAllowed && arguments.contains(LaunchFlag.welcome.rawValue)
+    }
+
     /// The store this launch should open.
     static func container(arguments: [String] = CommandLine.arguments) throws -> ModelContainer {
         guard isAllowed else { return try StoreSetup.makeContainer() }

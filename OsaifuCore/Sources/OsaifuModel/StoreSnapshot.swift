@@ -28,7 +28,7 @@ public extension StoreSnapshot {
 
     /// An empty snapshot, for a widget that cannot reach the store. It shows
     /// zero rather than nothing, so the Home Screen never sits blank.
-    static func empty(now: Date = .now) -> StoreSnapshot {
+    static func empty() -> StoreSnapshot {
         StoreSnapshot(
             homeCurrencyCode: Currency.defaultCode,
             spent: Money.zero(Currency.defaultCode),
@@ -39,7 +39,7 @@ public extension StoreSnapshot {
     /// Reads the shared store once.
     @MainActor
     static func read(now: Date = .now) -> StoreSnapshot {
-        guard let container = try? StoreSetup.sharedContainer() else { return .empty(now: now) }
+        guard let container = try? StoreSetup.sharedContainer() else { return .empty() }
         let context = ModelContext(container)
         // A widget shows this month. It has no use for five years of rows.
         let since = ExpenseAnalytics.windowStart(forMonthOf: now)

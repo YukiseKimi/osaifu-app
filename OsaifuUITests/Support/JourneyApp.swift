@@ -21,10 +21,13 @@ struct JourneyApp {
     /// Starts on an empty store, so a journey never reads what another left.
     func launch(
         _ opening: Opening = .thisMonth,
+        askingTheFirstRunQuestions welcome: Bool = false,
         file: StaticString = #filePath,
         line: UInt = #line
     ) throws {
-        try start(opening, arguments: ["--sealed", "--reset"], file: file, line: line)
+        var arguments = ["--sealed", "--reset"]
+        if welcome { arguments.append("--welcome") }
+        try start(opening, arguments: arguments, file: file, line: line)
     }
 
     /// Stops the app and starts it again on the same store, so a journey can

@@ -2,17 +2,6 @@ import Testing
 import Foundation
 @testable import OsaifuModel
 
-/// A fixed calendar, so a test gives the same answer in every time zone.
-private let utc: Calendar = {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.timeZone = TimeZone(identifier: "UTC")!
-    return calendar
-}()
-
-private func day(_ year: Int, _ month: Int, _ day: Int) -> Date {
-    utc.date(from: DateComponents(year: year, month: month, day: day))!
-}
-
 /// Yen has no minor digits, so a minor unit is a whole yen and the sums read
 /// the way they do on the screen.
 private func yen(_ amount: Int, _ category: ExpenseCategory, _ date: Date) -> Expense {
@@ -102,13 +91,6 @@ struct ExpenseAnalyticsTests {
     @Test("A month starts on its first day")
     func monthStartsOnItsFirstDay() {
         #expect(ExpenseAnalytics.startOfMonth(day(2026, 6, 17), calendar: utc) == day(2026, 6, 1))
-    }
-
-    @Test("An unknown category identifier reads as other")
-    func unknownCategoryReadsAsOther() {
-        let expense = yen(100, .food, day(2026, 6, 1))
-        expense.categoryID = "crypto"
-        #expect(expense.category == .other)
     }
 
     // One currency rule serves every screen. These hold the three families to

@@ -22,12 +22,10 @@ public enum WidgetRefresh {
     }
 
     private static let handler = Mutex<@Sendable () -> Void>(live)
-    private static let calls = Mutex<Int>(0)
 
     /// Call this after anything that changes what a widget shows: an expense,
     /// a limit, a rate, the home currency.
     public static func afterChange() {
-        calls.withLock { $0 += 1 }
         handler.withLock { $0() }
     }
 
@@ -35,7 +33,4 @@ public enum WidgetRefresh {
     public static func use(_ refresh: @escaping @Sendable () -> Void) {
         handler.withLock { $0 = refresh }
     }
-
-    /// How many times the app has asked, for a test that wants to know.
-    public static var callCount: Int { calls.withLock { $0 } }
 }

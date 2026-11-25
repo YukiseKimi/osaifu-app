@@ -57,11 +57,34 @@ struct PreferencesTests {
         #expect(row.homeCurrencyCode == "KRW")
     }
 
-    @Test("Setting the currency moves the timestamp")
-    func settingTheCurrencyMovesTheTimestamp() throws {
-        let row = Preferences(homeCurrencyCode: "JPY")
-        let before = row.updatedAt
-        row.setHomeCurrencyCode("USD")
-        #expect(row.updatedAt > before)
+    /// The newest row wins everywhere, so a setter that does not move the
+    /// timestamp quietly loses its change on the next sync.
+    @Test("Every setter moves the timestamp")
+    func settersMoveTheTimestamp() {
+        let longAgo = Date(timeIntervalSince1970: 1_000)
+
+        let currency = Preferences(homeCurrencyCode: "JPY")
+        currency.updatedAt = longAgo
+        currency.setHomeCurrencyCode("USD")
+        #expect(currency.updatedAt > longAgo)
+
+        let carries = Preferences(homeCurrencyCode: "JPY")
+        carries.updatedAt = longAgo
+        carries.setCarriesRemainderOver(true)
+        #expect(carries.updatedAt > longAgo)
+
+        let foreign = Preferences(homeCurrencyCode: "JPY")
+        foreign.updatedAt = longAgo
+        foreign.setCountsForeignSpend(true)
+        #expect(foreign.updatedAt > longAgo)
+    }
+
+    /// Moved here from the rates suite, which was testing Preferences.
+    @Test("The two budget switches start off")
+    func switchesStartOff() throws {
+        let context = ModelContext(try StoreSetup.makeInMemoryContainer())
+        let row = try Preferences.current(in: context, fallbackCurrencyCode: "JPY")
+        #expect(!row.carriesRemainderOver)
+        #expect(!row.countsForeignSpend)
     }
 }

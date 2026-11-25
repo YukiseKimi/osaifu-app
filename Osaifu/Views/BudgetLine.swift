@@ -59,6 +59,7 @@ struct BudgetLine: View {
                 }
             }
             .accessibilityElement(children: .combine)
+            .accessibilityIdentifier(A11yID.Overview.budgetLine)
         }
     }
 }

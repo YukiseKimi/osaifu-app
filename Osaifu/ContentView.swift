@@ -103,8 +103,11 @@ struct RootView: View {
                 fallbackCurrencyCode: Preferences.legacyCurrencyCode()
             )
             await sync.refresh(context: modelContext)
-            // Asked once, and never in front of a journey.
-            isWelcoming = !hasWelcomed && !HermeticLaunch.isSealed()
+            // Asked once, and never in front of a journey — except the one
+            // journey that is about them, which asks for them by name.
+            isWelcoming = HermeticLaunch.isSealed()
+                ? HermeticLaunch.showsWelcome()
+                : !hasWelcomed
         }
         .sheet(isPresented: $isWelcoming, onDismiss: { hasWelcomed = true }) {
             WelcomeView()
