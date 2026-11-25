@@ -39,6 +39,10 @@ struct RootView: View {
     #endif
     @AppStorage("appearance") private var appearanceRaw = AppearanceMode.system.rawValue
 
+    /// Whether the two first-run questions have been put, ever.
+    @AppStorage("hasWelcomed") private var hasWelcomed = false
+    @State private var isWelcoming = false
+
     private var appearance: AppearanceMode {
         AppearanceMode(rawValue: appearanceRaw) ?? .system
     }
@@ -99,6 +103,11 @@ struct RootView: View {
                 fallbackCurrencyCode: Preferences.legacyCurrencyCode()
             )
             await sync.refresh(context: modelContext)
+            // Asked once, and never in front of a journey.
+            isWelcoming = !hasWelcomed && !HermeticLaunch.isSealed()
+        }
+        .sheet(isPresented: $isWelcoming, onDismiss: { hasWelcomed = true }) {
+            WelcomeView()
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }

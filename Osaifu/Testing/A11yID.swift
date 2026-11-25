@@ -19,6 +19,15 @@ enum A11yID {
         static func categoryRow(_ categoryID: String) -> String { "overview.category.\(categoryID)" }
     }
 
+    enum Welcome {
+        /// The currency the first run offers.
+        static let currency = "welcome.currency"
+        /// The monthly limit the first run offers to set.
+        static let limit = "welcome.limit"
+        /// The button that writes both and puts the app up.
+        static let start = "welcome.start"
+    }
+
     enum QuickEntry {
         /// The pad, which says the sheet is up.
         static let pad = "quickEntry.pad"
