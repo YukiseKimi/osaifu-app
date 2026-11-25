@@ -37,13 +37,29 @@ struct BudgetLine: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text(progress.isOver
-                     ? Money(minorUnits: -progress.remaining.minorUnits, currencyCode: progress.remaining.currencyCode).formatted()
-                     : progress.remaining.formatted())
-                    .font(.headline)
-                    .monospacedDigit()
-                    .foregroundStyle(progress.isOver ? Color.red : .green)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(progress.isOver
+                         ? Money(minorUnits: -progress.remaining.minorUnits, currencyCode: progress.remaining.currencyCode).formatted()
+                         : progress.remaining.formatted())
+                        .font(.headline)
+                        .monospacedDigit()
+                        .foregroundStyle(progress.isOver ? Color.red : .green)
+
+                    // A month is too large a number to act on at the till.
+                    // The watch has said what today has left since the day it
+                    // shipped; there was no reason the phone should not.
+                    // A month that is over has nothing left today, and saying
+                    // "0 left today" under a red figure only says it twice.
+                    if !progress.isOver {
+                        Text("\(progress.leftToday().formatted()) left today")
+                            .font(.caption)
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier(A11yID.Overview.budgetLine)
         }
     }
 }

@@ -2,16 +2,6 @@ import Testing
 import Foundation
 @testable import OsaifuModel
 
-private let utc: Calendar = {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.timeZone = TimeZone(identifier: "UTC")!
-    return calendar
-}()
-
-private func day(_ year: Int, _ month: Int, _ day: Int) -> Date {
-    utc.date(from: DateComponents(year: year, month: month, day: day))!
-}
-
 private func row(_ code: String, carries: Bool = false, foreign: Bool = false, updated: Date) -> Preferences {
     let made = Preferences(homeCurrencyCode: code)
     made.carriesRemainderOver = carries
@@ -22,7 +12,7 @@ private func row(_ code: String, carries: Bool = false, foreign: Bool = false, u
 
 /// The one place the settings are worked out. It used to be eleven.
 @Suite("The settings, as one value")
-struct SettingsTests {
+struct AppSettingsTests {
 
     @Test("The row that changed last wins")
     func newestRowWins() {

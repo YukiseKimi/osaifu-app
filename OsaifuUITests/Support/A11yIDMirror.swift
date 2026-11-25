@@ -8,7 +8,14 @@ enum A11yIDMirror {
     enum Overview {
         static let list = "overview.list"
         static let add = "overview.add"
+        static let budgetLine = "overview.budgetLine"
         static func categoryRow(_ categoryID: String) -> String { "overview.category.\(categoryID)" }
+    }
+
+    enum Welcome {
+        static let currency = "welcome.currency"
+        static let limit = "welcome.limit"
+        static let start = "welcome.start"
     }
 
     enum QuickEntry {

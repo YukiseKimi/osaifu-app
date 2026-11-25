@@ -23,7 +23,7 @@ struct CategoryRow: View {
                 .buttonStyle(.bordered)
                 .controlSize(.mini)
                 .tint(chosen == category ? category.color : .secondary)
-                .accessibilityLabel(category.title)
+                .accessibilityLabel(category.title.localizedInApp)
                 .accessibilityAddTraits(chosen == category ? [.isSelected] : [])
             }
         }

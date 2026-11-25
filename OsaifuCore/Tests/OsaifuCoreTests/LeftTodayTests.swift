@@ -2,16 +2,6 @@ import Testing
 import Foundation
 @testable import OsaifuModel
 
-private let utc: Calendar = {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.timeZone = TimeZone(identifier: "UTC")!
-    return calendar
-}()
-
-private func day(_ year: Int, _ month: Int, _ day: Int) -> Date {
-    utc.date(from: DateComponents(year: year, month: month, day: day))!
-}
-
 private func progress(limit: Int, spent: Int) -> BudgetProgress {
     let money = { Money(minorUnits: $0, currencyCode: "JPY") }
     return BudgetProgress(

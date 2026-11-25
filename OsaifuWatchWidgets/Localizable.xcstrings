@@ -1,0 +1,50 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Left This Month": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月の残り"
+          }
+        }
+      }
+    },
+    "What the month has left of its limit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月の上限の残りを表示します。"
+          }
+        }
+      }
+    },
+    "Spent this month": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月の支出"
+          }
+        }
+      }
+    },
+    "Left this month": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今月の残り"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

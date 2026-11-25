@@ -24,7 +24,7 @@ struct SavedView: View {
                 .lineLimit(1)
 
             if let category {
-                Text(category.title)
+                Text(category.title.localizedInApp)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)

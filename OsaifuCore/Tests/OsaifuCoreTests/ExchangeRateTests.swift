@@ -50,15 +50,4 @@ struct ExchangeRateTests {
         let yen = Money(minorUnits: 1000, currencyCode: "JPY")
         #expect(yen.converted(to: "JPY", rate: 999) == yen)
     }
-
-    @Test("The two budget switches start off")
-    func switchesStartOff() throws {
-        let context = try context()
-        let preferences = try Preferences.current(in: context, fallbackCurrencyCode: "JPY")
-        #expect(!preferences.carriesRemainderOver)
-        #expect(!preferences.countsForeignSpend)
-
-        preferences.setCarriesRemainderOver(true)
-        #expect(preferences.carriesRemainderOver)
-    }
 }

@@ -42,8 +42,16 @@ struct QuickEntryView: View {
 
     var body: some View {
         NavigationStack {
+            // The pad sits at the bottom, under the thumb, and takes the
+            // room the sheet has rather than leaving it empty below the
+            // keys. What is left over goes above the keys, as air around
+            // the amount, which is the one thing worth looking at up there.
             VStack(spacing: 16) {
+                // The amount takes the room above the pad and centres in it,
+                // so the slack reads as air around the one thing worth
+                // looking at up here rather than as a hole in the middle.
                 amount
+                    .frame(maxHeight: .infinity)
                 chipRow
                 keypad
                 saveButton
@@ -94,7 +102,7 @@ struct QuickEntryView: View {
                     Button {
                         category = option
                     } label: {
-                        Label(option.title, systemImage: option.systemImage)
+                        Label(option.title.localizedInApp, systemImage: option.systemImage)
                             .font(.subheadline)
                             .lineLimit(1)
                     }
@@ -117,15 +125,26 @@ struct QuickEntryView: View {
                         Button { press(key) } label: {
                             Text(key)
                                 .font(.title2)
-                                .frame(maxWidth: .infinity, minHeight: 52)
+                                // The keys grow into whatever the sheet has
+                                // spare. 56 keeps them thumb-sized on the
+                                // smallest phone, and the cap below stops an
+                                // iPad from drawing a keypad half a metre tall.
+                                .frame(maxWidth: .infinity, minHeight: 56, maxHeight: .infinity)
                         }
                         .buttonStyle(.bordered)
+                        // A capsule stretched this tall is an ellipse, and a
+                        // keypad of ellipses does not read as keys.
+                        .buttonBorderShape(.roundedRectangle(radius: 18))
                         .accessibilityIdentifier(A11yID.QuickEntry.key(key))
                         .accessibilityLabel(key == "\u{232B}" ? "Delete" : key)
                     }
                 }
             }
         }
+        // Four rows of roughly ninety points: large enough to hit without
+        // looking, and capped so an iPad does not draw a keypad half a
+        // metre tall.
+        .frame(maxHeight: 380)
     }
 
     private var saveButton: some View {

@@ -7,6 +7,9 @@ enum LaunchFlag: String, CaseIterable {
     case sealed = "--sealed"
     /// Empty that store first. Without it a relaunch finds what it left.
     case reset = "--reset"
+    /// Put the first-run questions up, which a sealed launch otherwise
+    /// never shows. The journey that drives them asks for this.
+    case welcome = "--welcome"
 
     static func isKnown(_ argument: String) -> Bool {
         allCases.contains { $0.rawValue == argument }

@@ -49,11 +49,6 @@ struct OverviewView: View {
         )
     }
 
-    /// Color used for the glow halo behind the donut (largest category).
-    private var glowColor: Color {
-        categoryTotals.first?.category.color ?? .appAccent
-    }
-
     var body: some View {
         NavigationStack {
             Group {
@@ -96,7 +91,7 @@ struct OverviewView: View {
                 BudgetLine()
             }
             Section {
-                chart
+                OverviewChart(totals: categoryTotals, monthTotal: monthTotal)
                     .listRowBackground(Color.clear)
             }
             Section("Categories") {
@@ -106,15 +101,7 @@ struct OverviewView: View {
             }
             if !otherCurrencies.isEmpty {
                 Section {
-                    ForEach(otherCurrencies) { expense in
-                        HStack(spacing: 12) {
-                            CategoryIcon(category: expense.category, size: 30)
-                            Text(expense.category.title)
-                            Spacer()
-                            Text(expense.money.formatted())
-                                .monospacedDigit()
-                        }
-                    }
+                    OtherCurrenciesSection(expenses: otherCurrencies)
                 } header: {
                     Text("Other Currencies")
                 } footer: {
@@ -124,23 +111,56 @@ struct OverviewView: View {
         }
     }
 
-    private var chart: some View {
+    private var emptyState: some View {
+        // The budget line belongs here too: a month with no expense yet is
+        // exactly when "you have this much to spend" is worth reading.
+        VStack(spacing: 20) {
+            BudgetLine()
+                .padding(.horizontal)
+            emptyMessage
+        }
+    }
+
+    private var emptyMessage: some View {
+        ContentUnavailableView {
+            Label("No Expenses Yet", systemImage: "chart.pie")
+        } description: {
+            Text("Tap the + button to add your first expense for this month.")
+        } actions: {
+            Button("Add Expense") { isAddingExpense = true }
+                .buttonStyle(.borderedProminent)
+        }
+    }
+}
+
+/// The donut chart of this month's spending, the total in the hole, and the
+/// glow halo behind the chart in the largest category's color.
+private struct OverviewChart: View {
+    let totals: [CategoryTotal]
+    let monthTotal: Money
+
+    /// Color used for the glow halo behind the donut (largest category).
+    private var glowColor: Color {
+        totals.first?.category.color ?? .appAccent
+    }
+
+    var body: some View {
         VStack(spacing: 12) {
             Text(Date.now, format: .dateTime.month(.wide).year())
                 .font(.headline)
                 .foregroundStyle(.secondary)
-            Chart(categoryTotals) { item in
+            Chart(totals) { item in
                 SectorMark(
                     angle: .value("Amount", item.total.plotValue),
                     innerRadius: .ratio(0.62),
                     angularInset: 1.5
                 )
                 .cornerRadius(4)
-                .foregroundStyle(by: .value("Category", item.category.title))
+                .foregroundStyle(by: .value("Category", item.category.title.localizedInApp))
             }
             .chartForegroundStyleScale(
-                domain: categoryTotals.map(\.category.title),
-                range: categoryTotals.map(\.category.color)
+                domain: totals.map(\.category.title.localizedInApp),
+                range: totals.map(\.category.color)
             )
             .chartLegend(.hidden)
             .frame(height: 240)
@@ -167,25 +187,21 @@ struct OverviewView: View {
         }
         .padding(.vertical, 8)
     }
+}
 
-    private var emptyState: some View {
-        // The budget line belongs here too: a month with no expense yet is
-        // exactly when "you have this much to spend" is worth reading.
-        VStack(spacing: 20) {
-            BudgetLine()
-                .padding(.horizontal)
-            emptyMessage
-        }
-    }
+/// The expenses that no total can count, listed so the user can still see them.
+private struct OtherCurrenciesSection: View {
+    let expenses: [Expense]
 
-    private var emptyMessage: some View {
-        ContentUnavailableView {
-            Label("No Expenses Yet", systemImage: "chart.pie")
-        } description: {
-            Text("Tap the + button to add your first expense for this month.")
-        } actions: {
-            Button("Add Expense") { isAddingExpense = true }
-                .buttonStyle(.borderedProminent)
+    var body: some View {
+        ForEach(expenses) { expense in
+            HStack(spacing: 12) {
+                CategoryIcon(category: expense.category, size: 30)
+                Text(expense.category.title.localizedInApp)
+                Spacer()
+                Text(expense.money.formatted())
+                    .monospacedDigit()
+            }
         }
     }
 }
@@ -204,7 +220,7 @@ private struct CategoryRow: View {
         HStack(spacing: 12) {
             CategoryIcon(category: item.category)
             VStack(alignment: .leading) {
-                Text(item.category.title)
+                Text(item.category.title.localizedInApp)
                 Text(share, format: .percent.precision(.fractionLength(0)))
                     .font(.caption)
                     .foregroundStyle(.secondary)

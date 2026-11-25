@@ -46,7 +46,7 @@ struct AddExpenseIntent: AppIntent {
         try context.save()
         WidgetRefresh.afterChange()
 
-        return .result(dialog: "Added \(money.formatted()) for \(category.category.title).")
+        return .result(dialog: "Added \(money.formatted()) for \(category.category.title.localizedInApp).")
     }
 }
 

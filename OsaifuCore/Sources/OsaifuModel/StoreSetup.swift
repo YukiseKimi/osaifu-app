@@ -282,7 +282,8 @@ public enum StoreSetup {
         )
     }
 
-    /// A store that lives in memory, for previews and tests.
+    /// A store that lives in memory, for a test that wants a real store and
+    /// no file. A preview uses SwiftUI's own `.modelContainer(for:inMemory:)`.
     public static func makeInMemoryContainer() throws -> ModelContainer {
         let schema = Schema(versionedSchema: OsaifuSchemaV4.self)
         return try ModelContainer(

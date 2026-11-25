@@ -21,6 +21,22 @@ enum HermeticLaunch {
         Bundle.main.object(forInfoDictionaryKey: "OsaifuSealedLaunch") as? String == "YES"
     }
 
+    /// True when this launch opened a store of the run's own.
+    ///
+    /// A journey drives the app from a known, empty store, and the first-run
+    /// questions would stand in front of the first screen every one of them
+    /// waits for. They are worth a journey of their own, not an obstacle in
+    /// front of all the others.
+    static func isSealed(arguments: [String] = CommandLine.arguments) -> Bool {
+        isAllowed && arguments.contains(LaunchFlag.sealed.rawValue)
+    }
+
+    /// True when this launch should put the first-run questions up although
+    /// it is sealed. Only the journey that drives them passes this.
+    static func showsWelcome(arguments: [String] = CommandLine.arguments) -> Bool {
+        isAllowed && arguments.contains(LaunchFlag.welcome.rawValue)
+    }
+
     /// The store this launch should open.
     static func container(arguments: [String] = CommandLine.arguments) throws -> ModelContainer {
         guard isAllowed else { return try StoreSetup.makeContainer() }

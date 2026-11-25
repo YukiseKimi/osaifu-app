@@ -53,7 +53,7 @@ struct CategoryPie: View {
                     Circle()
                         .fill(color(of: slice))
                         .frame(width: 9, height: 9)
-                    Text(slice.name)
+                    Text(slice.name.localizedInApp)
                         .font(.callout)
                         .lineLimit(1)
                     Spacer(minLength: 12)

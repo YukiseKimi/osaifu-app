@@ -229,15 +229,6 @@ struct ExtensionStoreTests {
             lastOpenedVersion: lastOpenedVersion
         ))
     }
-
-    /// Siri shows what an intent throws, so the refusal has to be a sentence
-    /// the person can act on and not the reason underneath it.
-    @Test("A refusal says what to do about it")
-    func refusalReadsAsASentence() {
-        let refusal = StoreSetup.NotReady(reason: "the app has not opened the store yet")
-        #expect(refusal.errorDescription == "Open Osaifu on this device once, and this will work.")
-        #expect(refusal.localizedDescription == "Open Osaifu on this device once, and this will work.")
-    }
 }
 
 /// The old Double is the only bridge from the first version's data. These

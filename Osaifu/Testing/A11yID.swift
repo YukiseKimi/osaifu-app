@@ -15,8 +15,20 @@ enum A11yID {
         static let list = "overview.list"
         /// The button that opens the pad.
         static let add = "overview.add"
+        /// The line that says what is left of the month, and of today. It
+        /// is there only once a limit is set.
+        static let budgetLine = "overview.budgetLine"
         /// One category's row, carrying what that category spent this month.
         static func categoryRow(_ categoryID: String) -> String { "overview.category.\(categoryID)" }
+    }
+
+    enum Welcome {
+        /// The currency the first run offers.
+        static let currency = "welcome.currency"
+        /// The monthly limit the first run offers to set.
+        static let limit = "welcome.limit"
+        /// The button that writes both and puts the app up.
+        static let start = "welcome.start"
     }
 
     enum QuickEntry {
